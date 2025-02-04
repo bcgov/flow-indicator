@@ -1,4 +1,4 @@
-# Copyright 2023 Province of British Columbia
+# Copyright 2025 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 
 # Purpose:  Script loads data and uses various criteria to filter out flow recording stations in BC.
 
-
 library(tidyverse)
 library(lubridate)
 library(tidyhydat)
@@ -25,9 +24,6 @@ if(!dir.exists('data')) dir.create('data')
 if(!dir.exists('app/www')) dir.create('app/www')
 
 ##### First pass to filter for stations with complete data
-
-# Complete step for first time users or if data is out-of-date
-# tidyhydat::download_hydat()
 
 ## Get all BC stations with "flow"
 # STATIONS TO REMOVE BASED ON JON RECOMMENDATION (Trending Cluster Recommendations.xlsx)
@@ -49,32 +45,39 @@ stations_all_bc_list <- unique(hy_annual_stats(prov_terr_state_loc = "BC") %>%
 
 hydat_daily_all <- hy_daily_flows(station_number = stations_all_bc_list)
 
-# setting up water year and low flow year
+# Setting up water year (wYear) and low flow year (lfYear)
+# wYear is defined as the period between October 1st of one year and September 30th of the next.
+# See https://water.usgs.gov/nwc/explain_data.html
+# and https://www.epa.gov/waterdata/definition-and-characteristics-low-flows-dflow#year for details
 
-hydat_daily_all = hydat_daily_all %>%
+# lfYear is defined as the period starting from April 1st to March 31st.
+# See https://www.epa.gov/waterdata/definition-and-characteristics-low-flows-dflow#year for details
+
+hydat_daily_all <- hydat_daily_all %>%
   mutate(Year = year(Date),
          wYear = case_when(month(Date) >= 10 ~ year(Date),
                            month(Date) < 10 ~ year(Date) - 1),
          lfYear = case_when(month(Date) >= 4 ~ year(Date),
                             month(Date) < 4 ~ year(Date) - 1))
 
-#create daily station data for calendar year
+# Create daily station data for calendar year
 daily_station_data_Year <- hydat_daily_all %>%
   filter(!is.na(Value)) %>%
   group_by(STATION_NUMBER, Year) %>%
   summarise(n = n(),
-            ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))),
+            ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))), #yday() has accounted for leap years when counting days per calender year.
             perc_daily_missing = ((ndays - n) / ndays) * 100) %>%
   select(STATION_NUMBER,
          Year,
          perc_daily_missing_Year = perc_daily_missing)
 
-#create daily station data for water year
+# Create daily station data for water year
 daily_station_data_wYear <- hydat_daily_all %>%
   filter(!is.na(Value)) %>%
   group_by(STATION_NUMBER, wYear) %>%
   summarise(n = n(),
-            ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))),
+            #ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))), #yday() does not account for leap years when counting days per water year. This may inflate the percentage of missing values.
+            ndays = as.numeric(as.Date(paste0("01-10-", max(wYear)+1), format = "%d-%m-%Y")-as.Date(paste0("01-10-", max(wYear)), format = "%d-%m-%Y")), # Zhuoyan thinks this is accurate way to counting days per water year.
             perc_daily_missing = ((ndays - n) / ndays) * 100) %>%
   select(STATION_NUMBER,
          Year = wYear,
@@ -85,13 +88,14 @@ daily_station_data_lfYear <- hydat_daily_all %>%
   filter(!is.na(Value)) %>%
   group_by(STATION_NUMBER, lfYear) %>%
   summarise(n = n(),
-            ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))),
+            #ndays = max(yday(as.Date(paste0("31-12-", year(Date)), format = "%d-%m-%Y"))), #yday() does not account for leap years when counting days per low flow year. This may inflate the percentage of missing values.
+            ndays = as.numeric(as.Date(paste0("01-10-", max(lfYear)+1), format = "%d-%m-%Y")-as.Date(paste0("01-10-", max(lfYear)), format = "%d-%m-%Y")), # Zhuoyan thinks this is accurate way to counting days per low flow year.
             perc_daily_missing = ((ndays - n) / ndays) * 100) %>%
   select(STATION_NUMBER,
          Year = lfYear,
          perc_daily_missing_lfYear = perc_daily_missing)
 
-daily_station_data = daily_station_data_wYear %>%
+daily_station_data <- daily_station_data_wYear %>%
   left_join(daily_station_data_lfYear) %>%
   left_join(daily_station_data_Year) %>%
   left_join(hy_stations(), by = "STATION_NUMBER") %>%
@@ -99,19 +103,19 @@ daily_station_data = daily_station_data_wYear %>%
   filter(Year >= 1915)
 
 #Create complete station-year df
-minYear = min(daily_station_data$Year)
-maxYear = max(daily_station_data$Year)
-years = seq(minYear, maxYear)
-stations = unique(daily_station_data$STATION_NUMBER)
+minYear <- min(daily_station_data$Year)
+maxYear <- max(daily_station_data$Year)
+years <- seq(minYear, maxYear)
+stations <- unique(daily_station_data$STATION_NUMBER)
 
-station_year = expand.grid(stations, years) %>%
+station_year <- expand.grid(stations, years) %>%
   select("STATION_NUMBER" = "Var1", "Year" = "Var2")# this will then be joined with each step of filtering (new column with keep/discard based on filter)
 
-station_summary <- daily_station_data |>
+station_summary <- daily_station_data %>%
   group_by(STATION_NUMBER) %>%
   summarise(n_years = n(),
             incomplete_wYears = sum(perc_daily_missing_wYear>0),
-            incomplete_lfYears = sum(perc_daily_missing_lfYear>0),
+            incomplete_lfYears = sum(perc_daily_missing_lfYear>0, na.rm=TRUE), # remove NA before summing
             year_min = min(Year),
             year_max = max(Year)) %>%
   left_join(hy_stations(), by = "STATION_NUMBER") %>%
