@@ -315,7 +315,7 @@ server <- function(input, output, session) {
     map = leaflet() %>%
       addProviderTiles(providers$CartoDB,group = "CartoDB") %>%
       addTiles(group = 'Streets') %>%
-      #addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+      #addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>% Zhuoyan found that this line can cause disperance of polygons and sites on the map.
       # add_bc_home_button() %>%
       set_bc_view() %>%
       addLayersControl(baseGroups = c("CartoDB","Streets"),
