@@ -1,4 +1,4 @@
-# Copyright 2024 Province of British Columbia
+# Copyright 2025 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,21 +39,21 @@ if(!exists("regime_groups")){regime_groups = read.csv('app/www/river_groups.csv'
 if(!exists("hydrograph_dat")){hydrograph_dat = readRDS('app/www/hydrograph_dat.rds')}
 
 # Remove upstream stations (n = 185)
-stations_filt = stations_sf %>%
+stations_filt <- stations_sf %>%
   filter(keep == 1)
 
 # Merge with regime info
-stations_filt = stations_filt %>%
+stations_filt <- stations_filt %>%
   left_join(regime_groups) %>%
   filter(!is.na(Regime))
 
 # Subset annual flow data with filtered station list
-annual_flow_dat = annual_flow_dat %>%
+annual_flow_dat <- annual_flow_dat %>%
   filter(STATION_NUMBER %in% stations_filt$STATION_NUMBER)
 
 ## FIGURE 1 - Map of stations and regime type =====================================
 #Color scheme - for REGIMES (leflet map)
-mypal = colorFactor(palette = c("#D55E00", "#E69F00", "#F0E442","#009E73"),
+mypal <- colorFactor(palette = c("#D55E00", "#E69F00", "#F0E442","#009E73"),
                     domain = stations_filt,
                     levels = c("Snow-Dominated - Early Peak",
                                "Snow-Dominated - Late Peak",
@@ -113,7 +113,7 @@ ggplot() +
 # creates magnitude, significance and colour scheme columns
 # Magnitude is currently based on more than 2 day per decade change, 1 - 2 day per decade change and less than 1 day change for timing,
 # and more than 5% change, 1 - 5% change and less than 1% change for volume.
-calculate_MK_results = function(data,chosen_variable){
+calculate_MK_results <- function(data,chosen_variable){
 
   yeardat = data %>%
     group_by(STATION_NUMBER) %>%
@@ -175,28 +175,28 @@ calculate_MK_results = function(data,chosen_variable){
 }
 
 # Calculate for each metric, join with station info and add new metric name
-mk_annual = calculate_MK_results(annual_flow_dat, chosen_variable = "Average")  %>%
+mk_annual <- calculate_MK_results(annual_flow_dat, chosen_variable = "Average")  %>%
   left_join(stations_sf, by = "STATION_NUMBER") %>%
   mutate(metric = "Average Annual Flow")
 
-mk_peak = calculate_MK_results(annual_flow_dat, chosen_variable = "Max_3_Day")  %>%
+mk_peak <- calculate_MK_results(annual_flow_dat, chosen_variable = "Max_3_Day")  %>%
   left_join(stations_sf, by = "STATION_NUMBER")%>%
   mutate(metric = "Peak Flow")
 
-mk_low = calculate_MK_results(annual_flow_dat, chosen_variable = "Min_7_Day_summer")  %>%
+mk_low <- calculate_MK_results(annual_flow_dat, chosen_variable = "Min_7_Day_summer")  %>%
   left_join(stations_sf, by = "STATION_NUMBER")%>%
   mutate(metric = "Low Summer Flow")
 
-mk_freshet = calculate_MK_results(annual_flow_dat, chosen_variable = "DoY_50pct_TotalQ")  %>%
+mk_freshet <- calculate_MK_results(annual_flow_dat, chosen_variable = "DoY_50pct_TotalQ")  %>%
   left_join(stations_sf, by = "STATION_NUMBER")%>%
   mutate(metric = "Date of Freshet*")
 
-mk_date_low = calculate_MK_results(annual_flow_dat, chosen_variable = "R2MAD_DoY") %>%
+mk_date_low <- calculate_MK_results(annual_flow_dat, chosen_variable = "R2MAD_DoY") %>%
   left_join(stations_sf, by = "STATION_NUMBER")%>%
   mutate(metric = "Start of Low Flow Period")
 
 #combine above results
-mk_results_tbl = bind_rows(mk_annual,
+mk_results_tbl <- bind_rows(mk_annual,
                            mk_peak,
                            mk_low,
                            mk_date_low,
@@ -221,7 +221,7 @@ colour.scale.date <- c("> 2 days later"="#2171b5",
                        "> 2 days earlier"="#ff0000")
 
 # combine above into single doc
-mk_results_all = bind_rows(mk_annual,
+mk_results_all <- bind_rows(mk_annual,
                            mk_low,
                            mk_peak,
                            mk_freshet,
@@ -230,7 +230,7 @@ mk_results_all = bind_rows(mk_annual,
 
 
 # Create summary of sample size in each grouping - Volume metrics
-mk_magnitude = mk_results_all %>%
+mk_magnitude <- mk_results_all %>%
   filter(metric %in% c("Average Annual Flow",
                        "Low Summer Flow",
                        "Peak Flow"))  %>%
@@ -262,7 +262,7 @@ mk_magnitude = mk_results_all %>%
   ggtitle("Volume")
 
 # Timing metrics
-mk_timing = mk_results_all %>%
+mk_timing <- mk_results_all %>%
   filter(!metric %in% c("Average Annual Flow",
                        "Low Summer Flow",
                        "Peak Flow"))  %>%
@@ -295,7 +295,7 @@ mk_timing = mk_results_all %>%
 
 
 # Combine above into single cowplot grid and save
-mk_all = plot_grid(mk_magnitude, mk_timing, nrow = 2, rel_heights = c(1,1))
+mk_all <- plot_grid(mk_magnitude, mk_timing, nrow = 2, rel_heights = c(1,1))
 mk_all
 
 svg_px("./print_ver/out/figs/mk_all.svg", width = 600, height = 600)
@@ -303,7 +303,7 @@ plot(mk_all)
 dev.off()
 
 # Split by regime ===========================================================================
-annual_regime = mk_annual %>%
+annual_regime <- mk_annual %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 5% increase",
@@ -337,7 +337,7 @@ annual_regime = mk_annual %>%
   theme(legend.position = "none",
         plot.margin = unit(c(0.5,0,-2,0), "lines"))
 
-peak_regime = mk_peak %>%
+peak_regime <- mk_peak %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 5% increase",
@@ -375,7 +375,7 @@ peak_regime = mk_peak %>%
   theme(legend.position = "none",
         plot.margin = unit(c(0,0,-2,0), "lines"))
 
-low_regime = mk_low %>%
+low_regime <- mk_low %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 5% increase",
@@ -410,7 +410,7 @@ low_regime = mk_low %>%
         plot.margin = unit(c(0,0,-2,0), "lines"))
 
 # Timing
-freshet_regime = mk_freshet %>%
+freshet_regime <- mk_freshet %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 2 days later",
@@ -448,7 +448,7 @@ freshet_regime = mk_freshet %>%
   theme(legend.position = "none",
         plot.margin = unit(c(0.5,0,-2,0), "lines"))
 
-date_low_regime = mk_date_low %>%
+date_low_regime <- mk_date_low %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 2 days later",
@@ -483,8 +483,8 @@ date_low_regime = mk_date_low %>%
         plot.margin = unit(c(0,0,-2,0), "lines"))
 
 
-## Arrange and create plot for Volume metrics and save
-volume_regime = ggarrange(annual_regime, peak_regime, low_regime,
+# Arrange and create plot for Volume metrics and save
+volume_regime <- ggarrange(annual_regime, peak_regime, low_regime,
                           ncol = 1,
                           common.legend = TRUE,
                           legend = "bottom",
@@ -497,7 +497,7 @@ dev.off()
 
 
 # Do same for timing metrics and save
-timing_regime = ggarrange(freshet_regime, date_low_regime,
+timing_regime <- ggarrange(freshet_regime, date_low_regime,
                           ncol = 1,
                           common.legend = TRUE,
                           legend = "bottom",
@@ -512,7 +512,7 @@ dev.off()
 # Metrics - Volume
 # - Average Annual Flow =============================================================
 
-annual_bar = mk_annual %>%
+annual_bar <- mk_annual %>%
   mutate(magnitude_fixed = factor(case_when(significant == 0.1 ~ "No significant trend",
                                             .default = magnitude_fixed),
                                   levels = c("> 5% increase",
@@ -537,7 +537,7 @@ annual_bar = mk_annual %>%
 
 
 # Try plotting each major basin "separately and combining in facet grid
-coast = annual_bar %>%
+coast <- annual_bar %>%
   filter(region == "Coastal")
 
 coast.map = major_basins %>%
@@ -566,10 +566,10 @@ coast.map = major_basins %>%
 
 p1
 
-fraser = annual_bar %>%
+fraser <- annual_bar %>%
   filter(region == "Fraser")
 
-fraser.map = major_basins %>%
+fraser.map <- major_basins %>%
   ggplot() +
   labs(title = "Fraser") +
   theme_void() +
@@ -577,7 +577,7 @@ fraser.map = major_basins %>%
   geom_sf(data = major_basins %>%
             filter(Major_Basin == "Fraser"), fill = "yellow")
 
-p2 = fraser  %>%
+p2 <- fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
@@ -599,10 +599,10 @@ p2 = fraser  %>%
 
 p2
 
-Columbia = annual_bar %>%
+Columbia <- annual_bar %>%
   filter(region == "Columbia")
 
-Columbia.map = major_basins %>%
+Columbia.map <- major_basins %>%
   ggplot() +
   labs(title = "Columbia") +
   theme_void() +
@@ -610,7 +610,7 @@ Columbia.map = major_basins %>%
   geom_sf(data = major_basins %>%
             filter(Major_Basin == "Columbia"), fill = "yellow")
 
-p3 = Columbia  %>%
+p3 <- Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
@@ -632,10 +632,10 @@ p3 = Columbia  %>%
 
 p3
 
-Liard = annual_bar %>%
+Liard <- annual_bar %>%
   filter(region == "Liard")
 
-Liard.map = major_basins %>%
+Liard.map <- major_basins %>%
   ggplot() +
   labs(title = "Liard") +
   theme_void() +
@@ -643,7 +643,7 @@ Liard.map = major_basins %>%
   geom_sf(data = major_basins %>%
             filter(Major_Basin == "Liard"), fill = "yellow")
 
-p4 = Liard  %>%
+p4 <- Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
@@ -666,10 +666,10 @@ p4 = Liard  %>%
 p4
 
 
-Northwest = annual_bar %>%
+Northwest <- annual_bar %>%
   filter(region == "Northwest")
 
-Northwest.map = major_basins %>%
+Northwest.map <- major_basins %>%
   ggplot() +
   labs(title = "North-West") +
   theme_void() +
@@ -677,7 +677,7 @@ Northwest.map = major_basins %>%
   geom_sf(data = major_basins %>%
             filter(Major_Basin == "Northwest"), fill = "yellow")
 
-p5 = Northwest  %>%
+p5 <- Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
@@ -699,10 +699,10 @@ p5 = Northwest  %>%
 
 p5
 
-Peace = annual_bar %>%
+Peace <- annual_bar %>%
   filter(region == "Peace")
 
-Peace.map = major_basins %>%
+Peace.map <- major_basins %>%
   ggplot() +
   labs(title = "Peace") +
   theme_void() +
@@ -710,7 +710,7 @@ Peace.map = major_basins %>%
   geom_sf(data = major_basins %>%
             filter(Major_Basin == "Peace"), fill = "yellow")
 
-p6 = Peace  %>%
+p6 <- Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
@@ -734,7 +734,7 @@ p6
 
 
 
-annual_bar_plot = ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
+annual_bar_plot <- ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
                             common.legend = TRUE,
                             legend = "bottom",
                             # align = "v",
@@ -1288,7 +1288,7 @@ fraser.map = major_basins %>%
 p2 = fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Sub_Basin , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
