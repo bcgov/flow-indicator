@@ -1,4 +1,4 @@
-# Copyright 2023 Province of British Columbia
+# Copyright 2025 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -315,7 +315,7 @@ server <- function(input, output, session) {
     map = leaflet() %>%
       addProviderTiles(providers$CartoDB,group = "CartoDB") %>%
       addTiles(group = 'Streets') %>%
-      addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+      #addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
       # add_bc_home_button() %>%
       set_bc_view() %>%
       addLayersControl(baseGroups = c("CartoDB","Streets"),
