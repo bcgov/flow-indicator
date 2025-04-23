@@ -41,7 +41,7 @@ station_year <- station_year %>%
 # 1. Remove years with missing data (based on threshold value) ====================================
 
 # Set threshold (%)
-threshold = 3
+threshold = 4 # It is a conservative threshold to generate the low number of NAs. It ends up having less than or equal to 4% missing data for water, low flow and calender years
 
 # Identify years that have any missing data and merge with station_year for both water and low flow years
 percent_missing_wYear <- daily_station_data %>%
