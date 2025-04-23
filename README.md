@@ -26,7 +26,12 @@ script in the ‘app’ folder:
 The static PDF version of this indicator can be generated using the
 following script in the ‘print_ver’ folder:
 
--   Factsheets.Rmd
+-   flow-indicator.Rmd
+
+The html version of this indicator can be generated using the following
+script in the ‘print_ver’ folder:
+
+-   flow-indicator.qmd
 
 If you would like to contribute, please see our
 [CONTRIBUTING](CONTRIBUTING.md) guidelines.
@@ -37,7 +42,7 @@ to abide by its terms.
 
 ### License
 
-    Copyright 2023 Province of British Columbia
+    Copyright 2025 Province of British Columbia
 
     Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
     you may not use this file except in compliance with the License.

@@ -31,7 +31,11 @@ Following the successful implementation of these scripts, the interactive flow d
 
 The static PDF version of this indicator can be generated using the following script in the 'print_ver' folder:
 
--   Factsheets.Rmd
+-   flow-indicator.Rmd
+
+The html version of this indicator can be generated using the following script in the 'print_ver' folder:
+
+-   flow-indicator.qmd
 
 If you would like to contribute, please see our [CONTRIBUTING](CONTRIBUTING.md) guidelines.
 
@@ -39,7 +43,7 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 
 ### License
 
-    Copyright 2023 Province of British Columbia
+    Copyright 2025 Province of British Columbia
 
     Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
     you may not use this file except in compliance with the License.
