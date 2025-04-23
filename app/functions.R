@@ -75,30 +75,37 @@ calculate_MK_results = function(data,chosen_variable){
       #   bins %in% c(levels(bins)[5],levels(bins)[6]) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "Later"
       # ),
       magnitude_fixed = fcase(
-        change_timing < -0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days earlier",
-        between(change_timing, -0.2, -0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days earlier",
-        between(change_timing, -0.1, 0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "< 1 days change",
-        between(change_timing, 0.1, 0.2) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days later",
-        change_timing > 0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days later",
-        per_change < -0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% decrease",
-        between(per_change, -0.5, -0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% decrease",
-        between(per_change, -0.1, 0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "< 1% change",
-        between(per_change, 0.1, 0.5) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% increase",
-        per_change > 0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% increase"
-      ),
-      significant = case_when(P_value <=0.05~ 1,
-                              .default = 0.1),
+        # Below are one- or two-day changes per decades
+        # Reasoning behind using 0.2 and -0.2 as thresholds as the majority of data (> 50%) falls between -0.2 and 0.2.
+        change_timing < -0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days earlier",
+        between(change_timing, -0.2, -0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days earlier",
+        between(change_timing, -0.1, 0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "< 1 days change",
+        between(change_timing, 0.1, 0.2) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days later",
+        change_timing > 0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days later",
+        P_value > 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "Non-significant trend",
+        # Reasoning behind using 0.5 and -0.5 as thresholds as the majority of data (> 50%) falls between -0.5 and 0.5.
+        per_change < -0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% decrease",
+        between(per_change, -0.5, -0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% decrease",
+        between(per_change, -0.1, 0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "< 1% change",
+        between(per_change, 0.1, 0.5) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% increase",
+        per_change > 0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% increase",
+        P_value > 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "Non-significant trend"
+        ),
+      significant = case_when(P_value <=0.05~ 8,
+                              .default = 6),
       color = fcase(
-        change_timing < -0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'),"#CA0020",
-        between(change_timing, -0.2, -0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#F4A582",
-        between(change_timing, -0.1, 0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#F7F7F7",
-        between(change_timing, 0.1, 0.2) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#92C5DE",
-        change_timing > 0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#0571B0",
-        per_change < -0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#CA0020",
-        between(per_change, -0.5, -0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#F4A582",
-        between(per_change, -0.1, 0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#F7F7F7",
-        between(per_change, 0.1, 0.5) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#92C5DE",
-        per_change > 0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#0571B0")
+        change_timing < -0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'),"#ff0000",
+        between(change_timing, -0.2, -0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#009E73",
+        between(change_timing, -0.1, 0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#0072B2",
+        between(change_timing, 0.1, 0.2) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#D55E00",
+        change_timing > 0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#CC79A7",
+        P_value > 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "black",
+        per_change < -0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#ff0000",
+        between(per_change, -0.5, -0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#009E73",
+        between(per_change, -0.1, 0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#0072B2",
+        between(per_change, 0.1, 0.5) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#D55E00",
+        per_change > 0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#CC79A7",
+        P_value > 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "black")
     )
 }
 
@@ -166,21 +173,25 @@ station_flow_plot = function(data,variable_choice,clicked_station,stations_shape
                   dplyr::select(STATION_NUMBER,STATION_NAME, Regime))
 
     plot = ggplot(plot_dat) +
-      geom_point(aes(y = values, x = Year))  +
+      geom_point(aes(y = values, x = Year, color = factor(Missing)))  +
+      scale_color_manual(labels = c("Complete data", "Incomplete data (estimated)"),
+                         values = c("black", "red")) +
       labs(title = paste0(station_name," (",unique(clicked_station),")"),
            subtitle = paste0("Regime Type: ", plot_dat$Regime, "\n", unique(slopes$trend_sig),
                              " (Sen slope:",round(slopes$Slope,3),
                              ", p-value ~ ",round(unique(slopes$P_value),2),")"),
            caption = caption_label) +
       labs(y = paste(label.frame[label.frame$varname == variable_choice,]$labels,plot_units,sep = " ")) +
-      # scale_x_continuous(breaks = scales::pretty_breaks()) +
-      expand_limits(x = 1990) +
-      scale_x_continuous(breaks = seq(1990, 2020, by = 10),
-                         labels = seq(1990, 2020, by = 10)) +
+      scale_x_continuous(breaks = scales::pretty_breaks()) +
+      #expand_limits(x = 1990) +
+      #scale_x_continuous(breaks = seq(1990, 2020, by = 10),
+                         #labels = seq(1990, 2020, by = 10)) +
     theme_minimal() +
       theme(axis.title.y = element_markdown(size = 14),
             axis.title.x = element_text(size = 14),
-            axis.text = element_text(size = 11))
+            axis.text = element_text(size = 11),
+            legend.title = element_blank()) +
+    new_scale_color()
 
 
     if(variable_choice %in% c(
@@ -203,22 +214,26 @@ station_flow_plot = function(data,variable_choice,clicked_station,stations_shape
         mutate(SlopePreds = as.Date(SlopePreds, origin = "2000-10-01"))
 
       plot = ggplot(plot_dat) +
-        geom_point(aes(y = values, x = Year))  +
+        geom_point(aes(y = values, x = Year, color = factor(Missing)))  +
+        scale_color_manual(labels = c("Complete data", "Incomplete data (estimated)"),
+                           values=c("black", "red")) +
         labs(title = paste0(station_name," (",unique(clicked_station),")"),
              subtitle = paste0(unique(slopes$trend_sig),
                                " (Sen slope:",round(slopes$Slope,3),
                                ", p-value ~ ",round(unique(slopes$P_value),2),")"),
              caption = caption_label) +
         labs(y = paste(label.frame[label.frame$varname == variable_choice,]$labels,plot_units,sep = " ")) +
-        # scale_x_continuous(breaks = scales::pretty_breaks()) +
-        expand_limits(x = 1990) +
-        scale_x_continuous(breaks = seq(1990, 2020, by = 10),
-                           labels = seq(1990, 2020, by = 10)) +
+        scale_x_continuous(breaks = scales::pretty_breaks()) +
+        #expand_limits(x = 1990) +
+        #scale_x_continuous(breaks = seq(1990, 2020, by = 10),
+                           #labels = seq(1990, 2020, by = 10)) +
       theme_minimal() +
         theme(axis.title.y = element_markdown(size = 14),
               axis.title.x = element_text(size = 14),
-              axis.text = element_text(size = 11)) +
-        scale_y_date(date_labels = "%b-%d", date_breaks = "2 weeks")
+              axis.text = element_text(size = 11),
+              legend.title = element_blank()) +
+        scale_y_date(date_labels = "%b-%d", date_breaks = "2 weeks") +
+        new_scale_color()
     }
     if(variable_choice %in% c(
       'R2MAD_DoY'
@@ -235,31 +250,36 @@ station_flow_plot = function(data,variable_choice,clicked_station,stations_shape
         mutate(SlopePreds = as.Date(SlopePreds, origin = "2000-04-01"))
 
       plot = ggplot(plot_dat) +
-        geom_point(aes(y = values, x = Year))  +
+        geom_point(aes(y = values, x = Year, color = factor(Missing)))  +
+        scale_color_manual(labels = c("Complete data", "Incomplete data (estimated)"),
+                           values=c("black", "red")) +
         labs(title = paste0(station_name," (",unique(clicked_station),")"),
              subtitle = paste0(unique(slopes$trend_sig),
                                " (Sen slope:",round(slopes$Slope,3),
                                ", p-value ~ ",round(unique(slopes$P_value),2),")"),
              caption = caption_label) +
         labs(y = paste(label.frame[label.frame$varname == variable_choice,]$labels,plot_units,sep = " ")) +
-        # scale_x_continuous(breaks = scales::pretty_breaks()) +
-        expand_limits(x = 1990) +
-        scale_x_continuous(breaks = seq(1990, 2020, by = 10),
-                           labels = seq(1990, 2020, by = 10)) +
+        scale_x_continuous(breaks = scales::pretty_breaks()) +
+        #expand_limits(x = 1990) +
+        #scale_x_continuous(breaks = seq(1990, 2020, by = 10),
+                           #labels = seq(1990, 2020, by = 10)) +
       theme_minimal() +
         theme(axis.title.y = element_markdown(size = 14),
               axis.title.x = element_text(size = 14),
-              axis.text = element_text(size = 11)) +
-        scale_y_date(date_labels = "%b-%d", date_breaks = "2 weeks")
+              axis.text = element_text(size = 11),
+              legend.title = element_blank()) +
+        scale_y_date(date_labels = "%b-%d", date_breaks = "2 weeks") +
+      new_scale_color()
     }
     else{
       plot = plot
     }
 
     if(user_period_choice == 'all'){
-      plot = plot +  expand_limits(x = 1920) +
-        scale_x_continuous(breaks = seq(1920, 2020, by = 20),
-                           labels = seq(1920, 2020, by = 20))
+      plot = plot #+
+        #expand_limits(x = 1990) +
+        #scale_x_continuous(breaks = seq(1990, 2020, by = 20),
+                           #labels = seq(1990, 2020, by = 20))
     }
     else {
       plot = plot
