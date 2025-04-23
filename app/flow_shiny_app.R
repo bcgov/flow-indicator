@@ -200,7 +200,8 @@ server <- function(input, output, session) {
                                                                     "1 - 2 days earlier",
                                                                     "< 1 days change",
                                                                     "1 - 2 days later",
-                                                                    "> 2 days later")))
+                                                                    "> 2 days later",
+                                                                    "Non-significant trend")))
     } else {
       dat %>%
 
@@ -213,7 +214,8 @@ server <- function(input, output, session) {
                                                                     "1 - 5% decrease",
                                                                     "< 1% change",
                                                                     "1 - 5% increase",
-                                                                    "> 5% increase")))
+                                                                    "> 5% increase",
+                                                                    "Non-significant trend")))
     }
   })
 
@@ -267,22 +269,24 @@ server <- function(input, output, session) {
 
   mypal = reactive({
     if(input$user_var_choice %in% date_vars){
-      colorFactor(palette = 'RdBu',
+      colorFactor(palette = c("#ff0000", "#009E73", "#0072B2", "#D55E00", "#CC79A7", "black"),
                   domain = mk_results()$magnitude_fixed,
                   levels = c("> 2 days earlier",
                              "1 - 2 days earlier",
                              "< 1 days change",
                              "1 - 2 days later",
-                             "> 2 days later"),
+                             "> 2 days later",
+                             "Non-significant trend"),
                   ordered = T)
     } else {
-      colorFactor(palette = 'RdBu',
+      colorFactor(palette = c("#ff0000", "#009E73", "#0072B2", "#D55E00", "#CC79A7", "black"),
                   domain = mk_results()$magnitude_fixed,
                   levels = c("> 5% decrease",
                              "1 - 5% decrease",
                              "< 1% change",
                              "1 - 5% increase",
-                             "> 5% increase"),
+                             "> 5% increase",
+                             "Non-significant trend"),
                   ordered = T)
     }
   })
@@ -361,9 +365,10 @@ server <- function(input, output, session) {
       addCircleMarkers(layerId = ~STATION_NUMBER,
                        color = 'black',
                        fillColor = ~mypal()(magnitude_fixed),
-                       radius = 5,
-                       weight = 1,
-                       fillOpacity = ~significant,
+                       radius = ~significant,
+                       weight = ~significant*0.3,
+                       fillOpacity = 1,
+                       #~significant,
                        label = ~paste0(STATION_NAME, " (",STATION_NUMBER,") - ",HYD_STATUS),
                        data = stations_sf_with_trend()) %>%
 
@@ -372,7 +377,7 @@ server <- function(input, output, session) {
                 values = ~magnitude_fixed,
                 title = 'Change per decade',
                 data = stations_sf_with_trend(),
-                layerId = 'legend')#%>%
+                layerId = 'legend') #%>%
     # addSearchFeatures(
     #   targetGroups = 'STATION_NAME',
     #   options = searchFeaturesOptions(
