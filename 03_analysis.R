@@ -39,7 +39,7 @@ stations_to_keep <- final_station_summary_wYear %>%
   pull(STATION_NUMBER)
 
 # The below code calculates the following flow variables:
-# 1. Average (median, not mean) flow per year,
+# 1. Average (mean) flow per year,
 # 2. Timing of freshet (i.e. day of year by which 50% of flow has passed),
 # 3. Summer (May to late October) 7-day flow minimum / day of year of 7-day flow minimum
 # 4. Peak annual flow (7-day flow maximum)
@@ -78,7 +78,9 @@ flow_dat_filtered_wYear <- flow_dat %>%
          Month = month(Date),
          DoY = case_when(month(Date) >= 10 ~ yday(Date) - yday(paste0(year(Date),"-09-30")),
                           #month(Date) < 10 ~ yday(Date) + (365 - yday(paste0(year(Date),"-09-30"))))) %>%
-                         month(Date) < 10 ~ as.numeric(as.Date(Date)-as.Date(paste0(wYear,"-09-30"))))) %>%
+                         month(Date) < 10 ~ as.numeric(as.Date(Date)-as.Date(paste0(wYear,"-09-30")))),
+         Missing = case_when(is.na(Value) ~ "Y",
+                             !is.na(Value) ~ "N")) %>%
   dplyr::select(-lfYear, -Year)
 
 # Low flow year
@@ -99,7 +101,9 @@ flow_dat_filtered_lfYear <- flow_dat %>%
          Month = month(Date),
          DoY = case_when(month(Date) >= 4 ~ yday(Date) - yday(paste0(year(Date),"-03-31")),
                          #month(Date) < 4 ~ yday(Date) + (365 - yday(paste0(year(Date),"-03-31"))))) %>%
-                         month(Date) < 4 ~ as.numeric(as.Date(Date)-as.Date(paste0(lfYear,"-03-31"))))) %>%
+                         month(Date) < 4 ~ as.numeric(as.Date(Date)-as.Date(paste0(lfYear,"-03-31")))),
+         Missing = case_when(is.na(Value) ~ "Y",
+                             !is.na(Value) ~ "N")) %>%
   dplyr::select(-wYear, -Year)
 
 #Calendar year
@@ -120,14 +124,16 @@ flow_dat_filtered_cYear <- flow_dat %>%
                             month(Date) < 4 ~ year(Date) - 1),
          DoY = yday(Date),
          Month = month(Date),
-         Year = year(Date)) %>%
+         Year = year(Date),
+         Missing = case_when(is.na(Value) ~ "Y",
+                             !is.na(Value) ~ "N")) %>%
   dplyr::select(-wYear, -lfYear)
 
 # Imputation using mice package==========================================================================
 # Water year
-wYear_m <- max(5, sum(is.na(flow_dat_filtered_wYear$Value))/length(flow_dat_filtered_wYear$Value) *100) # Determine how many imputed datasets should be generated.
+wYear_m <- max(5, round(sum(is.na(flow_dat_filtered_wYear$Value))/length(flow_dat_filtered_wYear$Value) *100)) # Determine how many imputed datasets should be generated.
 flow_dat_filtered_wYear_imp <- mice(flow_dat_filtered_wYear %>%
-              select(-Symbol, -Regime, -clustGroup), m = wYear_m, , seed=50000)
+              select(-Symbol, -Regime, -clustGroup, -Missing), m = wYear_m, , seed=50000)
 
 flow_dat_filtered_wYear_imp_long <- mice::complete(flow_dat_filtered_wYear_imp, action='long') %>%
   left_join(flow_dat_filtered_wYear %>%
@@ -135,9 +141,9 @@ flow_dat_filtered_wYear_imp_long <- mice::complete(flow_dat_filtered_wYear_imp, 
             by = join_by(STATION_NUMBER, Parameter, Date, wYear, Month, DoY))
 
 # Low flow year
-lfYear_m <- max(5, sum(is.na(flow_dat_filtered_lfYear$Value))/length(flow_dat_filtered_lfYear$Value) *100) # Determine how many imputed datasets should be generated.
+lfYear_m <- max(5, round(sum(is.na(flow_dat_filtered_lfYear$Value))/length(flow_dat_filtered_lfYear$Value) *100)) # Determine how many imputed datasets should be generated.
 flow_dat_filtered_lfYear_imp <- mice(flow_dat_filtered_lfYear %>%
-                                      select(-Symbol, -Regime, -clustGroup), m = lfYear_m, , seed=50000)
+                                      select(-Symbol, -Regime, -clustGroup, -Missing), m = lfYear_m, , seed=50000)
 
 flow_dat_filtered_lfYear_imp_long <- mice::complete(flow_dat_filtered_lfYear_imp, action='long') %>%
   left_join(flow_dat_filtered_lfYear %>%
@@ -145,9 +151,9 @@ flow_dat_filtered_lfYear_imp_long <- mice::complete(flow_dat_filtered_lfYear_imp
             by = join_by(STATION_NUMBER, Parameter, Date, lfYear, Month, DoY))
 
 #Calendar year
-cYear_m <- max(5, sum(is.na(flow_dat_filtered_cYear$Value))/length(flow_dat_filtered_cYear$Value) *100) # Determine how many imputed datasets should be generated.
+cYear_m <- max(5, round(sum(is.na(flow_dat_filtered_cYear$Value))/length(flow_dat_filtered_cYear$Value) *100)) # Determine how many imputed datasets should be generated.
 flow_dat_filtered_cYear_imp <- mice(flow_dat_filtered_cYear %>%
-                                       select(-Symbol, -Regime, -clustGroup), m = cYear_m, , seed=50000)
+                                       select(-Symbol, -Regime, -clustGroup, -Missing), m = cYear_m, , seed=50000)
 
 flow_dat_filtered_cYear_imp_long <- mice::complete(flow_dat_filtered_cYear_imp, action='long') %>%
   left_join(flow_dat_filtered_cYear %>%
@@ -180,9 +186,13 @@ cYear_na <- flow_dat_filtered_cYear %>%
 annual_mean_dat <- flow_dat_filtered_wYear_imp_long %>% # use the imputation datasets to calculate the average
   filter(!(paste0(STATION_NUMBER, wYear) %in% paste0(wYear_na$STATION_NUMBER,wYear_na$wYear))) %>% # remove the years with all values being NAs
   group_by(wYear,STATION_NUMBER, .imp) %>%
-  summarize(Average = mean(Value)) %>%
+  summarize(Average = mean(Value),
+            Missing = case_when(any(Missing =="Y") ~ "Y",
+                                .default = "N")) %>%
   group_by(wYear,STATION_NUMBER) %>%
-  summarize(Average = mean(Average)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
+  summarize(Average = mean(Average), # follow Rubin's Rules to pool the averages from imputed datasets.
+            Missing = case_when(any(Missing =="Y") ~ "Y",
+                                .default = "N")) %>%
   #filter(wYear >= 1915) %>%# remove some random early year that looks to not have been removed by gap code (no idea why!). Zhuoyan's comment: I did not see any gaps in early years.
   rename(Year = wYear) %>%
   ungroup()
@@ -201,9 +211,11 @@ flow_timing_earlypeak <- flow_dat_filtered_wYear_imp_long %>%
          FlowToDate = cumsum(Value)) %>%
   group_by(wYear, STATION_NUMBER, .id, Date, Month, DoY, clustGroup, Regime, RowNumber) %>%
   summarize(TotalFlow = mean(TotalFlow),
-  FlowToDate = mean(FlowToDate)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
+            FlowToDate = mean(FlowToDate),
+            Missing = case_when(any(Missing =="Y") ~ "Y",
+                                .default = "N")) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
   group_by(STATION_NUMBER, wYear) %>%
-  filter(FlowToDate > TotalFlow/2) %>%
+  filter(FlowToDate > TotalFlow/2) %>% # We define the timing of Freshet as the point at which cumulative flow exceeds half of the annual flow.
   slice(1) %>%
   mutate(DoY_50pct_TotalQ = DoY,
          Date = as.Date(DoY, origin = "2000-10-01")) %>%
@@ -211,7 +223,8 @@ flow_timing_earlypeak <- flow_dat_filtered_wYear_imp_long %>%
   dplyr::select(STATION_NUMBER,
                 Year = wYear,
                 DoY_50pct_TotalQ,
-                Date)
+                Date,
+                Missing)
 
 # Snow-Dominated- late peak - Use Calendar Year
 flow_timing_latepeak <- flow_dat_filtered_cYear_imp_long %>%
@@ -222,9 +235,11 @@ flow_timing_latepeak <- flow_dat_filtered_cYear_imp_long %>%
          FlowToDate = cumsum(Value)) %>%
   group_by(Year, STATION_NUMBER, .id, Date, Month, DoY, clustGroup, Regime, RowNumber) %>%
   summarize(TotalFlow = mean(TotalFlow),
-            FlowToDate = mean(FlowToDate)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
+            FlowToDate = mean(FlowToDate),
+            Missing = case_when(any(Missing =="Y") ~ "Y",
+                                .default = "N")) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
   group_by(STATION_NUMBER, Year) %>%
-  filter(FlowToDate > TotalFlow/2) %>%
+  filter(FlowToDate > TotalFlow/2) %>% # We define the criterion (cumulative flow > 1/2 annual flow).
   slice(1) %>%
   mutate(DoY_50pct_TotalQ = DoY,
          Date = as.Date(DoY, origin = "2000-01-01")) %>%
@@ -232,7 +247,8 @@ flow_timing_latepeak <- flow_dat_filtered_cYear_imp_long %>%
   dplyr::select(STATION_NUMBER,
                 Year,
                 DoY_50pct_TotalQ,
-                Date)
+                Date,
+                Missing)
 
 
 # Mixed Regime - Use summer only (March to September)
@@ -244,7 +260,9 @@ flow_timing_mixed <- flow_dat_filtered_cYear_imp_long %>%
          FlowToDate = cumsum(Value)) %>%
   group_by(Year, STATION_NUMBER, .id, Date, Month, DoY, clustGroup, Regime, RowNumber) %>%
   summarize(TotalFlow = mean(TotalFlow),
-            FlowToDate = mean(FlowToDate)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
+            FlowToDate = mean(FlowToDate),
+            Missing = case_when(any(Missing =="Y") ~ "Y",
+                                .default = "N")) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
   group_by(STATION_NUMBER, Year) %>%
   filter(FlowToDate > TotalFlow/2) %>%
   slice(1) %>%
@@ -254,7 +272,8 @@ flow_timing_mixed <- flow_dat_filtered_cYear_imp_long %>%
   dplyr::select(STATION_NUMBER,
                 Year,
                 DoY_50pct_TotalQ,
-                Date)
+                Date,
+                Missing)
 
 # Bind together
 flow_timing_dat <- bind_rows(flow_timing_earlypeak,
@@ -290,6 +309,8 @@ rtn_2_mad_perc_rain <- flow_dat_filtered_lfYear_imp_long %>%
   group_by(STATION_NUMBER, Date, Parameter, Symbol, lfYear, Month, clustGroup, Regime, DoY) %>%
   summarize(Value = mean(Value)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
   filter(Regime == "Rain-Dominated") %>%
+  left_join(flow_dat_filtered_lfYear %>%
+              select(-Symbol)) %>%
   left_join(MAD_station) %>%
   group_by(STATION_NUMBER) %>%
   mutate(below_mad_perc = case_when (Value <= '20%MAD' ~ 1,
@@ -301,7 +322,8 @@ rtn_2_mad_perc_rain <- flow_dat_filtered_lfYear_imp_long %>%
   slice(1) %>%
   dplyr::select(STATION_NUMBER,
                 Year = lfYear,
-                R2MAD_DoY = DoY)
+                R2MAD_DoY = DoY,
+                Missing)
 
 rtn_2_mad_perc_rest <- flow_dat_filtered_lfYear_imp_long %>%
   group_by(STATION_NUMBER, Date, Parameter, Symbol, lfYear, Month, clustGroup, Regime, DoY, .imp) %>%
@@ -309,6 +331,8 @@ rtn_2_mad_perc_rest <- flow_dat_filtered_lfYear_imp_long %>%
   group_by(STATION_NUMBER, Date, Parameter, Symbol, lfYear, Month, clustGroup, Regime, DoY) %>%
   summarize(Value = mean(Value)) %>% # follow Rubin's Rules to pool the averages from imputed datasets.
   filter(Regime != "Rain-Dominated") %>%
+  left_join(flow_dat_filtered_lfYear %>%
+             select(-Symbol)) %>%
   left_join(MAD_station) %>%
   group_by(STATION_NUMBER) %>%
   mutate(below_mad_perc = case_when (Value <= '50%MAD' ~ 1,
@@ -320,7 +344,8 @@ rtn_2_mad_perc_rest <- flow_dat_filtered_lfYear_imp_long %>%
   slice(1) %>%
   dplyr::select(STATION_NUMBER,
                 Year = lfYear,
-                R2MAD_DoY = DoY)
+                R2MAD_DoY = DoY,
+                Missing)
 
 #Bind together
 rtn_2_mad_perc = bind_rows(rtn_2_mad_perc_rain,
@@ -392,7 +417,7 @@ low_flow_dat_filtered_7day <- stations_to_keep %>% map( ~ {
 
   low_flows <- min_7_day_dat %>%
     dplyr::select(STATION_NUMBER, Year = lfYear, everything()) %>%
-    left_join(summer_low_flows, by = join_by(STATION_NUMBER, Year, clustGroup, Regime))
+    left_join(summer_low_flows, by = join_by(STATION_NUMBER, Year, clustGroup, Regime, Missing))
 }) %>%
   bind_rows()
 
@@ -412,8 +437,8 @@ high_flow_dat_filtered_3day <- stations_to_keep %>% map( ~ {
     group_by(.imp) %>%
     data.table::data.table(key = c('STATION_NUMBER','wYear'))
 
-  # Calculate the rolling average with a 'window' of 7 days, such that a given day's
-  # mean flow is the average of that day plus six days LATER in the year ("align = 'right'").
+  # Calculate the rolling average with a 'window' of 3 days, such that a given day's
+  # mean flow is the average of that day plus two days LATER in the year ("align = 'right'").
   for (i in 1:wYear_m) {
     daily_flows_dt$flow_3_Day <- rep(0, nrow(daily_flows_dt))
     daily_flows_dt[daily_flows_dt$.imp == i, "flow_3_Day"] <- frollmean(daily_flows_dt[daily_flows_dt$.imp == i, Value], 3, align = 'right', na.rm=T)
@@ -443,8 +468,8 @@ high_flow_dat_filtered_3day <- stations_to_keep %>% map( ~ {
 annual_flow_dat_filtered <- annual_mean_dat  %>%
   left_join(flow_timing_dat) %>%
   left_join(rtn_2_mad_perc) %>%
-  left_join(low_flow_dat_filtered_7day, by = c("STATION_NUMBER"="STATION_NUMBER", "Year"= "Year")) %>%
-  left_join(high_flow_dat_filtered_3day, by = c("STATION_NUMBER"="STATION_NUMBER", "Year"= "Year", "clustGroup", "Regime")) %>%
+  left_join(low_flow_dat_filtered_7day, by = c("STATION_NUMBER"="STATION_NUMBER", "Year"= "Year", "Missing")) %>%
+  left_join(high_flow_dat_filtered_3day, by = c("STATION_NUMBER"="STATION_NUMBER", "Year"= "Year", "clustGroup", "Regime", "Missing")) %>%
   dplyr::select(-ends_with("_Date"))
 
 # Monthly Values =========================================================
@@ -467,7 +492,9 @@ monthly_mean_dat_filtered <- flow_dat_filtered_wYear_imp_long %>%
   #  perc_na = ((days_in_month(Month)-n())/days_in_month(Month))*100) %>%
   #filter(perc_na<10) %>%
   reframe(median_flow = median(Value,na.rm=T),
-          mean_flow = mean(Value, na.rm = T)) %>%
+          mean_flow = mean(Value, na.rm = T),
+          Missing = case_when(any(Missing =="Y") ~ "Y",
+                              .default = "N")) %>%
   rename(Year = wYear)
 
 
@@ -546,7 +573,7 @@ monthly_3day_highflow_dat_filtered <- stations_to_keep %>% map( ~ {
     data.table::data.table(key = c('STATION_NUMBER','wYear','Month'))
 
   # Calculate the rolling average with a 'window' of 3 days, such that a given day's
-  # mean flow is the average of that day plus six days LATER in the year ("align = 'right'").
+  # mean flow is the average of that day plus two days LATER in the year ("align = 'right'").
   for (i in 1:wYear_m) {
     daily_flows_dt$flow_3_Day <- rep(0, nrow(daily_flows_dt))
     daily_flows_dt[daily_flows_dt$.imp == i, "flow_3_Day"] <- frollmean(daily_flows_dt[daily_flows_dt$.imp == i, Value], 3, align = 'right', na.rm=T)
@@ -582,10 +609,10 @@ monthly_3day_highflow_dat_filtered <- stations_to_keep %>% map( ~ {
 
 monthly_flow_dat_filtered <- monthly_mean_dat_filtered %>%
   left_join(monthly_7day_lowflow_dat_filtered,
-            by = join_by(STATION_NUMBER, Year, Month)) %>%
+            by = join_by(STATION_NUMBER, Year, Month, Missing)) %>%
               dplyr::select(-Min_7_Day_DoY) %>%
   left_join(monthly_3day_highflow_dat_filtered,
-            by = join_by(STATION_NUMBER, Year, Month, Regime, clustGroup)) %>%
+            by = join_by(STATION_NUMBER, Year, Month, Regime, clustGroup, Missing)) %>%
               dplyr::select(-Max_3_Day_DoY) %>%
   mutate(Month = month.abb[Month]) %>%
   dplyr::rename('Average' = mean_flow) %>%
