@@ -105,7 +105,7 @@ ggplot() +
           color = "black",
           linewidth = 0.1) +
   geom_point(data = stations_filt,
-          aes(x = st_coordinates(geometry)[,1], y = st_coordinates(geometry)[,2], color = Regime),
+          aes(x = st_coordinates(geom)[,1], y = st_coordinates(geom)[,2], color = Regime),
           size = 3) +
   scale_color_manual(values = c("#F0E442","#009E73", "#D55E00", "#E69F00"))
 
@@ -147,30 +147,34 @@ calculate_MK_results <- function(data,chosen_variable){
     ungroup() %>%
     mutate(
       magnitude_fixed = fcase(
-        change_timing < -0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days earlier",
-        between(change_timing, -0.2, -0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days earlier",
-        between(change_timing, -0.1, 0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "< 1 days change",
-        between(change_timing, 0.1, 0.2) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days later",
-        change_timing > 0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days later",
-        per_change < -0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% decrease",
-        between(per_change, -0.5, -0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% decrease",
-        between(per_change, -0.1, 0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "< 1% change",
-        between(per_change, 0.1, 0.5) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% increase",
-        per_change > 0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% increase"
+        change_timing < -0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days earlier",
+        between(change_timing, -0.2, -0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days earlier",
+        between(change_timing, -0.1, 0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "< 1 days change",
+        between(change_timing, 0.1, 0.2) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "1 - 2 days later",
+        change_timing > 0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "> 2 days later",
+        P_value > 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "Non-significant trend",
+        per_change < -0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% decrease",
+        between(per_change, -0.5, -0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% decrease",
+        between(per_change, -0.1, 0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "< 1% change",
+        between(per_change, 0.1, 0.5) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "1 - 5% increase",
+        per_change > 0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "> 5% increase",
+        P_value > 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "Non-significant trend"
       ),
       significant = case_when(P_value <=0.05~ 1,
                               .default = 0.1),
       color = fcase(
-        change_timing < -0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'),"#CA0020",
-        between(change_timing, -0.2, -0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#F4A582",
-        between(change_timing, -0.1, 0.1) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#F7F7F7",
-        between(change_timing, 0.1, 0.2) & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#92C5DE",
-        change_timing > 0.2 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#0571B0",
-        per_change < -0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#CA0020",
-        between(per_change, -0.5, -0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#F4A582",
-        between(per_change, -0.1, 0.1) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#F7F7F7",
-        between(per_change, 0.1, 0.5) & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#92C5DE",
-        per_change > 0.5 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#0571B0")
+        change_timing < -0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'),"#ff0000",
+        between(change_timing, -0.2, -0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#009E73",
+        between(change_timing, -0.1, 0.1) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#0072B2",
+        between(change_timing, 0.1, 0.2) & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#D55E00",
+        change_timing > 0.2 & P_value <= 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "#CC79A7",
+        P_value > 0.05 & chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY'), "grey",
+        per_change < -0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#ff0000",
+        between(per_change, -0.5, -0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#009E73",
+        between(per_change, -0.1, 0.1) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#0072B2",
+        between(per_change, 0.1, 0.5) & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#D55E00",
+        per_change > 0.5 & P_value <= 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "#CC79A7",
+        P_value > 0.05 & (!chosen_variable %in% c('DoY_50pct_TotalQ', 'DoY_90pct_TotalQ', 'R2MAD_DoY', 'Min_7_Day_summer_DoY','Max_7_Day_DoY','Min_3_Day_DoY','Max_3_Day_DoY')), "grey")
     )
 }
 
@@ -205,19 +209,19 @@ mk_results_tbl <- bind_rows(mk_annual,
 ## Plot results ===============================================================================
 
 ## Plot settings - magnitude of flow
-colour.scale <- c("> 5% increase"="#2171b5",
-                  "1 - 5% increase"="#bdd7e7",
+colour.scale <- c("> 5% increase"="#CC79A7",
+                  "1 - 5% increase"="#D55E00",
                   "No significant trend" = "grey",
-                  "< 1% change" = "white",
-                  "1 - 5% decrease"="#ff7b7b",
+                  "< 1% change" = "#0072B2",
+                  "1 - 5% decrease"="#009E73",
                   "> 5% decrease"="#ff0000")
 
 ## Plot settings - Timing of flow
-colour.scale.date <- c("> 2 days later"="#2171b5",
-                       "1 - 2 days later"="#bdd7e7",
+colour.scale.date <- c("> 2 days later"="#CC79A7",
+                       "1 - 2 days later"="#D55E00",
                        "No significant trend" = "grey",
-                       "< 1 days change" = "white",
-                       "1 - 2 days earlier"="#ff7b7b",
+                       "< 1 days change" = "#0072B2",
+                       "1 - 2 days earlier"="#009E73",
                        "> 2 days earlier"="#ff0000")
 
 # combine above into single doc
@@ -551,7 +555,7 @@ coast.map = major_basins %>%
  p1 = coast  %>%
    ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -580,7 +584,7 @@ fraser.map <- major_basins %>%
 p2 <- fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -613,7 +617,7 @@ Columbia.map <- major_basins %>%
 p3 <- Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -646,7 +650,7 @@ Liard.map <- major_basins %>%
 p4 <- Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -680,7 +684,7 @@ Northwest.map <- major_basins %>%
 p5 <- Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -713,7 +717,7 @@ Peace.map <- major_basins %>%
 p6 <- Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean Annual Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -787,7 +791,7 @@ coast.map = major_basins %>%
 p1 = coast  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -816,7 +820,7 @@ fraser.map = major_basins %>%
 p2 = fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -849,7 +853,7 @@ Columbia.map = major_basins %>%
 p3 = Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -882,7 +886,7 @@ Liard.map = major_basins %>%
 p4 = Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -916,7 +920,7 @@ Northwest.map = major_basins %>%
 p5 = Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -949,7 +953,7 @@ Peace.map = major_basins %>%
 p6 = Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean peak Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1022,7 +1026,7 @@ coast.map = major_basins %>%
 p1 = coast  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1051,7 +1055,7 @@ fraser.map = major_basins %>%
 p2 = fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1084,7 +1088,7 @@ Columbia.map = major_basins %>%
 p3 = Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1117,7 +1121,7 @@ Liard.map = major_basins %>%
 p4 = Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1151,7 +1155,7 @@ Northwest.map = major_basins %>%
 p5 = Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1184,7 +1188,7 @@ Peace.map = major_basins %>%
 p6 = Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1259,7 +1263,7 @@ coast.map = major_basins %>%
 p1 = coast  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +
@@ -1288,7 +1292,7 @@ fraser.map = major_basins %>%
 p2 = fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = Sub_Basin , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Sub_Basin , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1320,7 +1324,7 @@ Columbia.map = major_basins %>%
 p3 = Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1352,7 +1356,7 @@ Liard.map = major_basins %>%
 p4 = Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1385,7 +1389,7 @@ Northwest.map = major_basins %>%
 p5 = Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1417,7 +1421,7 @@ Peace.map = major_basins %>%
 p6 = Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean freshet Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1490,7 +1494,7 @@ coast.map = major_basins %>%
 p1 = coast  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1518,7 +1522,7 @@ fraser.map = major_basins %>%
 p2 = fraser  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1550,7 +1554,7 @@ Columbia.map = major_basins %>%
 p3 = Columbia  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1582,7 +1586,7 @@ Liard.map = major_basins %>%
 p4 = Liard  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1615,7 +1619,7 @@ Northwest.map = major_basins %>%
 p5 = Northwest  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1647,7 +1651,7 @@ Peace.map = major_basins %>%
 p6 = Peace  %>%
   ggplot() +
   # ggtitle("Change in Mean date_low Flow") +
-  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +  xlab("") +
@@ -1730,12 +1734,12 @@ monthly_average_bar_plot = mk_average_monthly %>%
   summarise(n = n()) %>%
   ggplot() +
   # ggtitle("Monthly Median River Flow")+
-  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black") +
+  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black", show.legend=TRUE) +
   scale_fill_manual(name = "Change per decade",
-                    values = c("#2171b5",
-                               "#bdd7e7",
-                               "white",
-                               "#ff7b7b",
+                    values = c("#CC79A7",
+                               "#D55E00",
+                               "#0072B2",
+                               "#009E73",
                                "#ff0000",
                                "grey"),
                     labels = c("> 5% increase",
@@ -2022,10 +2026,10 @@ for(s in names(stationMaps)) {
         legend.position = "top",
         legend.text = element_text(size = 16)) +
     scale_fill_manual(name = "Change per decade",
-                                        values = c("#2171b5",
-                                                   "#bdd7e7",
-                                                   "white",
-                                                   "#ff7b7b",
+                                        values = c("#CC79A7",
+                                                   "#D55E00",
+                                                   "#0072B2",
+                                                   "#009E73",
                                                    "#ff0000",
                                                    "grey"),
                                         labels = c("> 5% increase",
@@ -2081,10 +2085,10 @@ for(s in names(stationMaps)) {
           legend.position = "top",
           legend.text = element_text(size = 16)) +
     scale_fill_manual(name = "Change per decade",
-                      values = c("#2171b5",
-                                 "#bdd7e7",
-                                 "white",
-                                 "#ff7b7b",
+                      values = c("#CC79A7",
+                                 "#D55E00",
+                                 "#0072B2",
+                                 "#009E73",
                                  "#ff0000",
                                  "grey"),
                       labels = c("> 2 days later",
