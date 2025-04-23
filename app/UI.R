@@ -12,6 +12,7 @@ library(ggtext)
 library(shinyjs)
 library(shinyBS)
 library(rmapshaper)
+library(ggnewscale)
 
 # Trend selection options
 trend_select_options_tab = wellPanel(
@@ -31,6 +32,7 @@ trend_select_options_tab = wellPanel(
                               "Nass",
                               "Nechako",
                               "Okanagan",
+                              "Peace",
                               "Quesnel",
                               "Similkameen",
                               "Skeena",
@@ -38,12 +40,10 @@ trend_select_options_tab = wellPanel(
                               "Stikine",
                               "Thompson",
                               "Upper Fraser",
-                              "Upper Peace",
                               "Upper and Central Liard",
                               "Vancouver Island",
                               "Williston Lake",
-                              "Yukon",
-                              "NA")
+                              "Yukon")
     )
     ),
     div(style = "margin-top:2.5rem;",
@@ -90,9 +90,11 @@ trend_select_options_tab = wellPanel(
            checkboxInput(inputId = 'recent',
                          label = 'Include recently installed stations (1992+)',
                          value = FALSE),
+           bsTooltip(id = 'recent', title = "Include recently installed stations (1992+) with more than 10 years of data", placement = "right", trigger = "hover"),
            checkboxInput(inputId = 'upstream',
                          label = 'Include upstream stations',
-                         value = F)
+                         value = F),
+           bsTooltip(id = 'upstream', title = "Include upstream stations, in contrast to the downtream stations, which are shown by default on the map", placement = "right", trigger = "hover")
     )
   )
 )
