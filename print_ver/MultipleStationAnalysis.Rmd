@@ -38,6 +38,7 @@ library(ggrepel)
 library(patchwork)
 library(ggpubr)
 library(knitr)
+library(here)
 
 opts_chunk$set(echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.height=3.5, fig.width = 8, fig.align = 'center')
 
@@ -74,7 +75,7 @@ bin_data_hist = T
 bin_data_hist_size = 10
 
 # Load in data.
-flow_dat = read.csv('app/www/flow_dat.csv') %>% 
+flow_dat = read.csv(here('app/www/flow_dat.csv')) %>% 
   as_tibble()
 
 ```

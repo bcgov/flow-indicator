@@ -2,9 +2,9 @@
 topic: "water"
 title: "Trends in Stream and River Flow"
 output: 
-  pdf_document: envreportutils.internal::print_ver
   html_document:
     self_contained: false
+  pdf_document: envreportutils.internal::print_ver
 editor_options: 
   chunk_output_type: console
 ---
@@ -38,6 +38,7 @@ library(ggrepel)
 library(patchwork)
 library(ggpubr)
 library(knitr)
+library(here)
 
 opts_chunk$set(echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.height=3.5, fig.width = 8, fig.align = 'center')
 
@@ -74,7 +75,7 @@ bin_data_hist = T
 bin_data_hist_size = 10
 
 # Load in data.
-flow_dat = read_rds('app/www/annual_flow_dat.rds') %>% 
+flow_dat = read_rds(here('app/www/annual_flow_dat.rds')) %>% 
   as_tibble()
 ```
 
