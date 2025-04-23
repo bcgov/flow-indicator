@@ -34,7 +34,7 @@ flow_dat = reactive({
 
 flow_dat_chosen_var = reactive({
   flow_dat() %>%
-    dplyr::select(STATION_NUMBER,Year,values = !!sym(input$user_var_choice)) |>
+    dplyr::select(STATION_NUMBER,Year, Missing, values = !!sym(input$user_var_choice)) |>
     filter(!is.na(values))
 })
 
