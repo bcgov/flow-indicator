@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@bcgov/design-tokens": "^3.0.0"
+  }
+}
