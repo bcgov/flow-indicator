@@ -1,14 +1,15 @@
 ---
 topic: "water"
 title: "Long-Term Trends in River Flows in B.C."
-output: 
-  html_document:
-    self_contained: false
-  pdf_document: envreportutils.internal::print_ver
-  word_document: default
-editor_options: 
-  markdown: 
-    wrap: 72
+format: 
+    pdf: 
+       template: "template.tex"
+       keep-tex: FALSE
+       latex_engine: xelatex
+       gphxpath: "img/"
+       mainfont: "Palatino Linotype"
+       sansfont: "Calibri"
+       
 ---
 
 ```{=html}
