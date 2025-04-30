@@ -1,20 +1,28 @@
 ---
 title: Long-Term Trends in River Flows in B.C.
+topic: "water"
 format:
-  html:
-    #toc: true
-    #toc-location: left
-    theme: none
-    embed-resources: true
-    encoding: 'UTF-8'
-    include-in-header: 
-      - file: "flow_files/head.html"
-      - file: "flow_files/header.html"
-      - file: "flow_files/header-water.html"
-    #include-before-body:
-    include-after-body:
-      - file: "flow_files/footer.html"
-    editor: visual
+     pdf: 
+       toc: true
+       toc-location: left
+       template: "template.tex"
+       keep-tex: FALSE
+       latex_engine: xelatex
+       gphxpath: "img/"
+       mainfont: "Palatino Linotype"
+       sansfont: "Calibri"
+     html:
+       theme: none
+       embed-resources: true
+       encoding: 'UTF-8'
+       include-in-header: 
+          - file: "flow_files/head.html"
+          - file: "flow_files/header.html"
+          - file: "flow_files/header-water.html"
+       #include-before-body:
+       include-after-body:
+          - file: "flow_files/footer.html"
+       editor: visual
 ---
 
 ```{=html}
@@ -32,6 +40,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
 ```
+\pagebreak
 ```{r setup, echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE, results = 'hide'}
 
 library(dplyr)
@@ -166,15 +175,15 @@ is_html <- knitr::is_html_output()
 is_pdf <- knitr::is_latex_output()
 ```
 
--   **River water is one of the most important water sources for people living in British Columbia.** Rivers provide freshwater supply and recreational opportunities for British Columbian people. They also offer a variety of habitats that support a wide range of biodiversity. 
+-   **River water is one of the most important water sources for people living in British Columbia.** Rivers provide freshwater supply and recreational opportunities for British Columbian people. They also offer a variety of habitats that support a wide range of biodiversity.
 
 -   **Changes in the timing and volume of river flow can affect both human and natural ecosystems.** These changes can affect our ability to predict and manage seasonal water resources. They may disrupt natural systems that rely on typical flow patterns.
-    
+
 -   **Low river flows in summer may reduce the amount of water available for use. They include agriculture, hydroelectric power generation, industry and communities.** Low flows may impede salmon migration and often link to warmer water temperatures. Reduced river levels can decrease water quality, threatening the health of aquatic ecosystems.
-    
--   **Extreme high river flows can pose risks to human life and may lead to economic losses.** Flood events are often linked to rainfall and snowmelt. 
-    
--   **Long-term trends in the river flow volume vary by flow metric and regime type.** Trends in peak flow volume are stable across the province. But annual flows are increasing for many snow-dominated rivers. Summer low flow volumes are decreasing, particularly in rivers with rain-dominated regimes. 
+
+-   **Extreme high river flows can pose risks to human life and may lead to economic losses.** Flood events are often linked to rainfall and snowmelt.
+
+-   **Long-term trends in the river flow volume vary by flow metric and regime type.** Trends in peak flow volume are stable across the province. But annual flows are increasing for many snow-dominated rivers. Summer low flow volumes are decreasing, particularly in rivers with rain-dominated regimes.
 
 -   **Freshet is occurring earlier for a large number of rivers across the province.** This change has a less pronounced effect on the start of low flow period. But several snow-dominated rivers are still showing an earlier start to this period.
 
@@ -206,18 +215,17 @@ We use flow metrics to quantify changes in river flow volume and timing of key f
 
 Flow volume and timing of specific flow events vary based on the source of the river water. There are many types of river flow regimes^1^. This analysis divides the regimes into four categories:
 
-- **Snow-Dominated - Early Peak**: Snowmelt in the spring and early summer is a major source of flows. This causes a spring freshet and lower volumes in summer. 
+-   **Snow-Dominated - Early Peak**: Snowmelt in the spring and early summer is a major source of flows. This causes a spring freshet and lower volumes in summer.
 
-- **Snow-Dominated - Late Peak**: Flows are also driven by snowmelt. But, due to higher latitude and elevations at the river source, snowmelt occurs later in the year. This leads to a delayed freshet and later summer low flows.
+-   **Snow-Dominated - Late Peak**: Flows are also driven by snowmelt. But, due to higher latitude and elevations at the river source, snowmelt occurs later in the year. This leads to a delayed freshet and later summer low flows.
 
-- **Rain-Dominated**: Precipitation is the main source of flows. In B.C., these rivers are in the coastal and island regions. Such rivers typically flow high in the winter and low in the summer.
+-   **Rain-Dominated**: Precipitation is the main source of flows. In B.C., these rivers are in the coastal and island regions. Such rivers typically flow high in the winter and low in the summer.
 
-- **Mixed Regime**: Flows come from both snowmelt and precipitation. This leads to a freshet event and high river flows in the winter.
+-   **Mixed Regime**: Flows come from both snowmelt and precipitation. This leads to a freshet event and high river flows in the winter.
 
 ## Description of river flow metrics
 
-The metrics calculated at each station aim to quantify two aspects of river flow changes:
-1) the volume of river flow and 2) the timing of key river flow events.
+The metrics calculated at each station aim to quantify two aspects of river flow changes: 1) the volume of river flow and 2) the timing of key river flow events.
 
 ### Volume metrics
 
@@ -245,9 +253,10 @@ We use the long-term Mean Annual Discharge (MAD) to estimate the beginning of lo
 
 \newpage
 
-## River Stations
+## River stations
 
-The map below shows all `r nrow(stations_sf_filtered)` downstream river stations. The color of the dots represents the flow regime of the rivers where the stations are located. Black lines show the boundaries of the six major river basins. They, from top left to bottom right, are Northwest, Liard, Peace, Coastal, Fraser, and Columbia. Grey lines outline 23 sub-basins, each containing at least one monitoring station.
+The map below shows all `r nrow(stations_sf_filtered)` downstream river stations. The color of the dots represents the flow regime of the rivers where the stations are located. Black lines show the boundaries of the six major river basins. They, from top left to bottom right, are Northwest, Liard, Peace, Coastal, Fraser, and Columbia. Grey lines outline 23 sub-basins.
+
 ```{r include = is_html, eval=is_html, overview_map, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE, fig.align = 'left', fig.width = 28, fig.asp=0.75}
 plot(leaflet_map)
 ```
@@ -256,28 +265,29 @@ plot(leaflet_map)
 plot(leaflet_map)
 ```
 
-## Trend Results
+## Trend results
+
 ::: {.content-visible when-format="html"}
 ### Exploring water flow trends
 
-The interactive map below offers several options to explore. 
+The interactive map below offers several options to explore.
 
-- To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations.
+-   To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations.
 
-- After selecting the 'Trend Options', click on a station of interest on the map. This will display the flow metric plot in the bottom left corner.
+-   After selecting the 'Trend Options', click on a station of interest on the map. This will display the flow metric plot in the bottom left corner.
 
-- To explore hydrograph information for the selected station, go to the ‘Station Hydrograph’ tab. 
+-   To explore hydrograph information for the selected station, go to the ‘Station Hydrograph’ tab.
 
-- To reset the view, select “All” or click on the B.C. button in the top left corner to return to all regions.
+-   To reset the view, select “All” or click on the B.C. button in the top left corner to return to all regions.
 
 ```{=html}
 <iframe style="width: 100%; height: 1000px; border: none" frameborder="0" data-external="1" src="https://bcgov-env.shinyapps.io/flow-indicator-2025/" id="Interactive visualization of Long-Term Trends in River Flows in B.C."></iframe>
 ```
 :::
+
 ### Volume metrics
 
-- Of the `r nrow(stations_sf_filtered)` monitored stations, `r sum(average_direction$n[average_direction$direction == "positive"])`
-showed an increase in average annual flows. Among them, `r sum(average_cat$n[average_cat$category == "> 5% increase"])` rose by more than 5% per decade. In contrast, `r sum(average_direction$n[average_direction$direction == "negative"])` stations had decreasing average annual flows. The remaining `r sum(average_direction$n[average_direction$direction == "no change"])` stations had no significant trend.
+-   Of the `r nrow(stations_sf_filtered)` monitored stations, `r sum(average_direction$n[average_direction$direction == "positive"])` showed an increase in average annual flows. Among them, `r sum(average_cat$n[average_cat$category == "> 5% increase"])` rose by more than 5% per decade. In contrast, `r sum(average_direction$n[average_direction$direction == "negative"])` stations had decreasing average annual flows. The remaining `r sum(average_direction$n[average_direction$direction == "no change"])` stations had no significant trend.
 
 -   Annual peak flows increased at `r sum(peak_direction$n[peak_direction$direction == "positive"])` stations and decreased at `r sum(peak_direction$n[peak_direction$direction == "negative"])` stations. The vast majority (`r sum(peak_direction$n[peak_direction$direction == "no change"])` stations) showed no significant change.
 
@@ -286,54 +296,27 @@ showed an increase in average annual flows. Among them, `r sum(average_cat$n[ave
 ```{r include = is_html, eval=is_html, fig.width = 10, fig.height = 8, echo = FALSE, fig.alt="MK_all"}
 mk_all
 ```
+
 ```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height = 6, fig.alt="MK_all", echo = FALSE}
 mk_all
 ```
-* Date of Freshet plot uses a reduced number of stations. This is because the analysis does not include rain-dominated rivers.
+
+-   Date of Freshet plot uses a reduced number of stations. This is because the analysis does not include rain-dominated rivers.
 
 ### Timing metrics
 
--   Freshet had been occurring earlier for many locations. Among them, `r sum(freshet_direction$n[freshet_direction$direction == "negative"])` showed an earlier trend. Of these, `r sum(freshet_cat$n[freshet_cat$category == "> 2 days earlier"])` stations were
-occurring 2 days earlier per decade. `r sum(freshet_direction$n[freshet_direction$direction == "no change"] + freshet_cat$n[freshet_cat$category == "< 1 days change"])` stations
-showed little change, with less than 1 day change per decade, or no significant trend. No stations showed a late freshet. 
+-   Freshet had been occurring earlier for many locations. Among them, `r sum(freshet_direction$n[freshet_direction$direction == "negative"])` showed an earlier trend. Of these, `r sum(freshet_cat$n[freshet_cat$category == "> 2 days earlier"])` stations were occurring 2 days earlier per decade. `r sum(freshet_direction$n[freshet_direction$direction == "no change"] + freshet_cat$n[freshet_cat$category == "< 1 days change"])` stations showed little change, with less than 1 day change per decade, or no significant trend. No stations showed a late freshet.
 
--   Most locations did not show significant trends in the start date of the low flow period.  Among those that did, `r sum(low_date_direction$n[low_date_direction$direction == "negative"])` stations had earlier low flows, while only `r sum(low_date_direction$n[low_date_direction$direction == "positive"])` stations had later low flows.
+-   Most locations did not show significant trends in the start date of the low flow period. Among those that did, `r sum(low_date_direction$n[low_date_direction$direction == "negative"])` stations had earlier low flows, while only `r sum(low_date_direction$n[low_date_direction$direction == "positive"])` stations had later low flows.
 
-### Volume and Timing of Flow by River Regime
-
-Trends in several flow metrics varied by river regime. There was a clear difference in trends between rain/mixed and snow-dominated regimes. 
-
-### Volume metrics
-
-`r average_direction$n[average_direction$direction == "positive" & average_direction$Regime == "Snow-Dominated - Late Peak"]` stations with late peak flows showed Increasing flows. `r average_direction$n[average_direction$direction == "positive" & average_direction$Regime == "Snow-Dominated - Early Peak"]` stations with regular peak flows also showed an increasing trend. In contrast, rain-dominated and mixed-regime rivers had declining average annual flows.
-
-Low summer flows showed a 5% or greater decline in more than half of rain-dominated rivers (`r Low_cat$n[Low_cat$category == "> 5% decrease" & Low_cat$Regime == "Rain-Dominated"]` stations). 
-
-```{r include = is_html, eval=is_html, fig.width = 10, fig.height = 8, echo = FALSE, fig.alt="Volume regime"}
-volume_regime
-```
-```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height = 6, fig.alt="Volume regime", echo = FALSE}
-volume_regime
-```
-
-### Timing metrics
-
-```{r include = is_html, eval=is_html, fig.width = 10, fig.height = 8, echo = FALSE, fig.alt="Timing regime"}
-timing_regime
-```
-```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height = 6, fig.alt="Timing regime", echo = FALSE}
-timing_regime
-```
-
-Earlier freshet was occurring in many rivers across all regimes. In particular, rivers with spring freshet (`r freshet_direction$n[freshet_direction$direction == "negative" & freshet_direction$Regime == "Snow-Dominated - Early Peak"]` stations) showed an earlier freshet. Snow-dominated rivers also had earlier starts to the low flow period. This included `r low_date_direction$n[low_date_direction$direction == "negative" & low_date_direction$Regime == "Snow-Dominated - Late Peak"]` stations with late peak flows and `r low_date_direction$n[low_date_direction$direction == "negative" & low_date_direction$Regime == "Snow-Dominated - Early Peak"]` stations with regular peak flows.
-
-### Changes in Flow Volume by Month
+### Changes in flow volume by month
 
 ### Average monthly flows
 
 ```{r include = is_html, eval=is_html, fig.width = 10, fig.height=8, echo = FALSE, fig.alt="Monthly averaged bar plot"}
 monthly_average_bar_plot
 ```
+
 ```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height=6, fig.alt="Monthly averaged bar plot", echo = FALSE}
 monthly_average_bar_plot + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -347,6 +330,7 @@ monthly_average_bar_plot +
 ```{r include = is_html, eval=is_html, fig.width = 10, fig.height=8, echo = FALSE, fig.alt="Monthly low flow bar plot"}
 monthly_low_flow_bar_plot
 ```
+
 ```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height=6, fig.alt="Monthly low flow bar plot", echo = FALSE}
 monthly_low_flow_bar_plot +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -360,6 +344,7 @@ monthly_low_flow_bar_plot +
 ```{r include = is_html, eval=is_html, fig.width = 10, fig.height=8, echo = FALSE, fig.alt="Monthly peak flow bar plot"}
 monthly_peak_flow_bar_plot
 ```
+
 ```{r include = is_pdf, eval=is_pdf, fig.width = 7, fig.height=6, fig.alt="Monthly peak flow bar plot", echo = FALSE}
 monthly_peak_flow_bar_plot +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -370,42 +355,11 @@ monthly_peak_flow_bar_plot +
 
 \newpage
 
-## Data
-
-The data sets are all sourced from the B.C. Data Catalogue, distributed
-under the [Open Government Licence - British
-Columbia](https://www2.gov.bc.ca/gov/content?id=A519A56BC2BF44E4A008B33FCF527F61).
-
-<!-- -   [Indicator Summary Data: Long-term Trends in Timing and Volume of
-    B.C.'s River
-    Flow](https://catalogue.data.gov.bc.ca/dataset/indicator-summary-data-change-in-timing-and-volume-of-river-flow-in-bc-1912-2012-) -->
-
--   River Flow Stations and daily flow data accessed with ['tidyhydat'](https://cran.r-project.org/web/packages/tidyhydat/index.html) R
-    Package
-
-<!-- Here Jon needs to upload watershed and basin layers (or at least point in right direction) -->
-<!-- -   [Hydrologic -->
-<!--     Zones](https://catalogue.data.gov.bc.ca/dataset/bc-hydrologic-zones). -->
-
-------------------------------------------------------------------------
-
-Published and Available Online at Environmental Reporting BC
-(`r updateDate`)
-
-::: {.content-visible when-format="html"}
-[Download a printable version of this indicator (PDF)](http://wwwd.env.gov.bc.ca/soe/indicators/water/print_ver/envreportbc_FI_April2025.pdf)
+::: {style="background-color: rgba(0, 51, 102, 0.80)"}
+## [Methods]{style="color:#fff;"}
 :::
 
-Email correspondence to:
-[envreportbc\@gov.bc.ca](mailto:envreportbc@gov.bc.ca){.email}
-
-*Suggested Citation*:\
-Environmental Reporting BC. `r format(Sys.Date(), "%Y")`. Long-Term Trends in River Flows in
-B.C. State of Environment Reporting, Ministry of Environment and Climate
-Change Strategy, British Columbia, Canada.
-
-## Methods
-
+::: {.content-visible when-format="pdf"}
 ### Regime designation
 
 The seasonal distribution of high flows and low flows varied across the province. Amounts and timing of precipitation, snowmelt, or both drove this variation. Their effects differed by station. So we used different flow metrics to represent hydrological changes. To assign flow metrics to each station, we determined seasonal streamflow regimes. We assessed these regimes using normalized monthly flows for each station^1^. We then applied a statistical clustering analysis to group the stations. This resulted in four high-level seasonal regimes.
@@ -414,7 +368,7 @@ The seasonal distribution of high flows and low flows varied across the province
 
 Monitoring varied across stations and rivers. To reduce errors in trend estimations, we applied a set of filtering procedures. These included:
 
--   **Missing annual data**: We removed station-years with more than 4% (~ 2 weeks) of missing data from the trend analysis. After this step, most stations had complete monthly data.
+-   **Missing annual data**: We removed station-years with more than 4% (\~ 2 weeks) of missing data from the trend analysis. After this step, most stations had complete monthly data.
 
 -   **Data gaps**: We removed all annual data preceding the gap of 5 or more years at each station. This step ensured continuous datasets across all stations for trend analyses.
 
@@ -432,17 +386,26 @@ Monitoring varied across stations and rivers. To reduce errors in trend estimati
 
 ### Data imputation
 
-We used multivariate imputation by chained equations (MICE) to fill in missing values. We conducted MICE with predictive mean matching (PMM) to generate five imputed datasets. For each imputed dataset, we calculated six flow metrics. The volume metrics were mean annual flow, monthly averaged flow, low summer low, and peak low. The timing metrics included date of freshet and date of low flow. Finally, we pooled estimates from the imputed datasets using  Rubin’s rule. All imputation steps were conducted using mice R package. 
-    
+We used multivariate imputation by chained equations (MICE) to fill in missing values. We conducted MICE with predictive mean matching (PMM) to generate five imputed datasets. For each imputed dataset, we calculated six flow metrics. The volume metrics were mean annual flow, monthly averaged flow, low summer low, and peak low. The timing metrics included date of freshet and date of low flow. Finally, we pooled estimates from the imputed datasets using Rubin’s rule. All imputation steps were conducted using mice R package.
+
 ### Trend analysis
 
-We applied trend analysis to the pooled estimates at both annual and monthly scales. For the annual analysis, we calculated the mean value for each year across stations. For the monthly analysis, we calculated the mean value for each month over the time series. We used Kendall’s nonparametric test to assess trends using EnvStats R package. We estimated the trend magnitude using the Theil and Sen approach ^4,5^. 
+We applied trend analysis to the pooled estimates at both annual and monthly scales. For the annual analysis, we calculated the mean value for each year across stations. For the monthly analysis, we calculated the mean value for each month over the time series. We used Kendall’s nonparametric test to assess trends using EnvStats R package. We estimated the trend magnitude using the Theil and Sen approach ^4,5^.
 
-We used the p-value of 0.05 as the threshold of statistical significance. When p < 0.05, it indicated that there was a < 5% likelihood of observing the trend by chance. When a trend was not significant (p > 0.05), it meant that it was not clear enough to be a trend. In such cases, we should interpret its presence and magnitude with caution. Several factors can influence p-values. These included data variability, sample size, trend magnitude, and other factors. 
+We used the p-value of 0.05 as the threshold of statistical significance. When p \< 0.05, it indicated that there was a \< 5% likelihood of observing the trend by chance. When a trend was not significant (p \> 0.05), it meant that it was not clear enough to be a trend. In such cases, we should interpret its presence and magnitude with caution. Several factors can influence p-values. These included data variability, sample size, trend magnitude, and other factors.
+:::
 
-## References
+::: {.content-visible when-format="html"}
+-   Detailed methods used to develop this indicator, along with relevant results (e.g., volume and timing of flow by river regime), are available in the [printable version of this indicator (PDF)](http://wwwd.env.gov.bc.ca/soe/indicators/water/print_ver/envreportbc_FI_April2025.pdf)
+ 
+-   Current trend analysis methods differ from those used in the previous version of this flow indicator, so the results are not directly comparable.
+:::
 
-- ^1^ Curran, J. H., & Biles, F. E. (2021). Identification of seasonal streamflow regimes and streamflow drivers for daily and peak flows in Alaska. Water Resources Research, 57. https://doi.org/10.1029/2020wr028425
+::: {style="background-color: rgba(0, 51, 102, 0.80)"}
+## [References]{style="color:#fff;"}
+:::
+
+-   ^1^ Curran, J. H., & Biles, F. E. (2021). Identification of seasonal streamflow regimes and streamflow drivers for daily and peak flows in Alaska. Water Resources Research, 57. https://doi.org/10.1029/2020wr028425
 
 -   ^2^[Description of Water Year (USGS)](https://water.usgs.gov/nwc/explain_data.html)
 
@@ -452,4 +415,39 @@ We used the p-value of 0.05 as the threshold of statistical significance. When p
 
 -   ^5^ Sen, P.K. (1968). Estimates of the Regression Coefficient Based on Kendall’s Tau. Journal of the American Statistical Association 63, 1379-1389. https://www.tandfonline.com/doi/abs/10.1080/01621459.1968.10480934
 
+::: {style="background-color: rgba(0, 51, 102, 0.80)"}
+## [Data]{style="color:#fff;"}
+:::
+
+The data sets are all sourced from the B.C. Data Catalogue, distributed under the [Open Government Licence - British Columbia](https://www2.gov.bc.ca/gov/content?id=A519A56BC2BF44E4A008B33FCF527F61).
+
+```{=html}
+<!-- -   [Indicator Summary Data: Long-term Trends in Timing and Volume of
+    B.C.'s River
+    Flow](https://catalogue.data.gov.bc.ca/dataset/indicator-summary-data-change-in-timing-and-volume-of-river-flow-in-bc-1912-2012-) -->
+```
+
+-   River Flow Stations and daily flow data accessed with ['tidyhydat'](https://cran.r-project.org/web/packages/tidyhydat/index.html) R Package
+
+<!-- Here Jon needs to upload watershed and basin layers (or at least point in right direction) -->
+
+<!-- -   [Hydrologic -->
+
+<!--     Zones](https://catalogue.data.gov.bc.ca/dataset/bc-hydrologic-zones). -->
+
+------------------------------------------------------------------------
+
+Published and Available Online at Environmental Reporting BC (`r updateDate`)
+
+::: {.content-visible when-format="html"}
+[Download a printable version of this indicator (PDF)](http://wwwd.env.gov.bc.ca/soe/indicators/water/print_ver/envreportbc_FI_April2025.pdf)
+:::
+
+Email correspondence to: [envreportbc\@gov.bc.ca](mailto:envreportbc@gov.bc.ca){.email}
+
+*Suggested Citation*:\
+Environmental Reporting BC. `r format(Sys.Date(), "%Y")`. Long-Term Trends in River Flows in B.C. State of Environment Reporting, Ministry of Environment and Climate Change Strategy, British Columbia, Canada.
+
 \newpage
+```{r child=if (is_pdf) here("print_ver", "flow-indicator-appendix.qmd")}
+```
