@@ -245,11 +245,11 @@ Volume of low flows (meters^3^/s) represents the lowest flow for each low-flow y
 
 #### Date of Freshet
 
-We define freshet as the flood of a river, often due to snow melt. We estimate the freshet date as when river discharge reaches 50% of the total for a specified period. The effects of snowmelt on river flow vary by regime. So the method of calculating freshet timing differs among regimes. For snow-dominated regimes, we use water year to account for early peak. For late peak, we use the calendar year to reflect the delayed freshet. For mixed regimes, we exclude the rain-dominated winter months (October - February). Instead, we calculate discharge between March and September to estimate freshet timing. For rain-dominated stations, we do not calculate freshet, as it does not take place.
+We define the freshet as the seasonal flood of a river, often due to snow melt. The freshet date is defined as the day when cumulative river discharge reaches 50% of the total for a specified period. The effects of snowmelt on river flow vary by regime. So the method of calculating freshet timing differs among regimes. For snow-dominated regimes, we use water year to account for early peak. For late-peak regimes, the calendar year is used to reflect the delayed freshet. For mixed regimes, we exclude the rain-dominated winter months (October - February). Instead, freshet timing is estimated based on discharge calculated between March and September. For rain-dominated stations, we do not calculate freshet timing, as freshet does not take place.
 
 #### Start of low flow period
 
-We use the long-term Mean Annual Discharge (MAD) to estimate the beginning of low summer flows. We define the start of the low-flow period as the first date when discharge drops to or below 50% of MAD after peak flow. For most rivers, we use 50% MAD, but for rain-dominated rivers, we apply a lower threshold of 20% MAD.
+We use the long-term Mean Annual Discharge (MAD) to estimate the beginning of low summer flows. The start of the low-flow period is defined as the first day when discharge drops to or below 50% of MAD after peak flow. For most rivers, a 50% MAD threshold is used, but for rain-dominated rivers, a lower threshold of 20% MAD is applied.
 
 \newpage
 
@@ -272,7 +272,7 @@ plot(leaflet_map)
 
 The interactive map below offers several options to explore.
 
--   To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations.
+-   To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations. This helps focus on newer stations or compare trends between upstream and downstream stations. 
 
 -   After selecting the 'Trend Options', click on a station of interest on the map. This will display the flow metric plot in the bottom left corner.
 
