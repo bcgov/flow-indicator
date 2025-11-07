@@ -40,7 +40,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
 ```
+
 \pagebreak
+
 ```{r setup, echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE, results = 'hide'}
 
 library(dplyr)
@@ -175,7 +177,7 @@ is_html <- knitr::is_html_output()
 is_pdf <- knitr::is_latex_output()
 ```
 
--   **River water is one of the most important water sources for people living in British Columbia.** Rivers provide freshwater supply and recreational opportunities for British Columbian people. They also offer a variety of habitats that support a wide range of biodiversity.
+-   **Rivers are one of the most important water sources for people living in British Columbia.** Measuring the flow of rivers across B.C. is essential for effective management and sustainable use.
 
 -   **Changes in the timing and volume of river flow can affect both human and natural ecosystems.** These changes can affect our ability to predict and manage seasonal water resources. They may disrupt natural systems that rely on typical flow patterns.
 
@@ -207,9 +209,9 @@ is_pdf <- knitr::is_latex_output()
 -   <a href="#data" id="toc-data"><u>Data, Methods, and References</u></a>
 :::
 
-## River flows in British Columbia
+To help understand the trends measured in rivers across the province, there are several key foundation
 
-We use flow metrics to quantify changes in river flow volume and timing of key flow events. There are `r nrow(stations_sf_filtered)` stations across the Province, or `r nrow(stations_sf)` stations when including upstream stations. These stations have tracked river flow for `r min(stations_sf_filtered$N_years)` to `r max(stations_sf_filtered$N_years)` years between `r min(stations_sf_filtered$Min_Year)` and `r max(stations_sf_filtered$Max_Year)`.
+Flow Regimes across British Columbia
 
 ### Types of flow regimes
 
@@ -255,6 +257,8 @@ We use the long-term Mean Annual Discharge (MAD) to estimate the beginning of lo
 
 ## River stations
 
+This analysis considers `r nrow(stations_sf_filtered)` stations across the Province, or `r nrow(stations_sf)` stations when including upstream stations. These stations have tracked river flow for `r min(stations_sf_filtered$N_years)` to `r max(stations_sf_filtered$N_years)` years between `r min(stations_sf_filtered$Min_Year)` and `r max(stations_sf_filtered$Max_Year)`.
+
 The map below shows all `r nrow(stations_sf_filtered)` downstream river stations. The color of the dots represents the flow regime of the rivers where the stations are located. Black lines show the boundaries of the six major river basins. They, from top left to bottom right, are Northwest, Liard, Peace, Coastal, Fraser, and Columbia. Grey lines outline 23 sub-basins.
 
 ```{r include = is_html, eval=is_html, overview_map, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE, fig.align = 'left', fig.width = 28, fig.asp=0.75}
@@ -272,7 +276,7 @@ plot(leaflet_map)
 
 The interactive map below offers several options to explore.
 
--   To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations. This helps focus on newer stations or compare trends between upstream and downstream stations. 
+-   To begin, go to 'Trend options' tab in the bottom left corner. You can select a basin of interest from the drop-down menu or by clicking it on the map. Choose annual trend or explore the trend for a specific month by selecting ‘Monthly’. Next, navigate to the 'Trend to Display' option to select a flow metric of interest from the dropdown menu. You can choose a timespan: 'Three decades (1992–2022)' or 'All available years'. Check the two boxes to explore recently installed or upstream stations. This helps focus on newer stations or compare trends between upstream and downstream stations.
 
 -   After selecting the 'Trend Options', click on a station of interest on the map. This will display the flow metric plot in the bottom left corner.
 
@@ -397,7 +401,7 @@ We used the p-value of 0.05 as the threshold of statistical significance. When p
 
 ::: {.content-visible when-format="html"}
 -   Detailed methods used to develop this indicator, along with relevant results (e.g., volume and timing of flow by river regime), are available in the [printable version of this indicator (PDF)](http://wwwd.env.gov.bc.ca/soe/indicators/water/print_ver/envreportbc_FI_April2025.pdf)
- 
+
 -   Current trend analysis methods differ from those used in the previous version of this flow indicator, so the results are not directly comparable.
 :::
 
@@ -449,5 +453,6 @@ Email correspondence to: [envreportbc\@gov.bc.ca](mailto:envreportbc@gov.bc.ca){
 Environmental Reporting BC. `r format(Sys.Date(), "%Y")`. Long-Term Trends in River Flows in B.C. State of Environment Reporting, Ministry of Environment and Climate Change Strategy, British Columbia, Canada.
 
 \newpage
+
 ```{r child=if (is_pdf) here("print_ver", "flow-indicator-appendix.qmd")}
 ```
