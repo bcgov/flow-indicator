@@ -62,8 +62,10 @@ mypal <- colorFactor(palette = c("#D55E00", "#E69F00", "#F0E442","#009E73"),
                     ordered = T)
 
 leaflet(options =
-          leafletOptions(zoomControl = FALSE)) %>%
-  setView(lat = 55, lng = -125, zoom = 5) %>%
+          leafletOptions(zoomControl = FALSE, maxZoom = 5.68,
+                         minZoom = 5.68)) %>%
+  #fitBounds(lng1 = -139.229207, lat1 = 48.113982, lng2 = -115, lat2 = 60.145537) %>%
+  setView(lat = 54.6, lng = -125.8, zoom = 0) %>%
   addTiles(group = "Streets") %>%
   addPolygons(data = sub_basins,
               color = "black",
@@ -255,7 +257,7 @@ mk_magnitude <- mk_results_all %>%
   group_by(metric, magnitude_fixed) %>%
   summarise(n = n()) %>%
   ggplot() +
-  geom_col(aes(x = metric, y = n, fill = magnitude_fixed), col = "black") +
+  geom_col(aes(x = metric, y = n, fill = magnitude_fixed), col = "black", show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -288,7 +290,7 @@ mk_timing <- mk_results_all %>%
   summarise(n = n()) %>%
   ggplot() +
   labs(x = "", y = "Number of Stations") +
-  geom_col(aes(x = metric, y = n, fill = magnitude_fixed), col = "black") +
+  geom_col(aes(x = metric, y = n, fill = magnitude_fixed), col = "black", show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +
@@ -330,7 +332,7 @@ annual_regime <- mk_annual %>%
   mutate(percent = n/n_stations) %>%
   ggplot() +
   ggtitle("Mean Annual Flow") +
-  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -364,7 +366,7 @@ peak_regime <- mk_peak %>%
   mutate(percent = n/n_stations) %>%
   ggplot() +
   ggtitle("Peak Flow") +
-  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -402,7 +404,7 @@ low_regime <- mk_low %>%
   mutate(percent = n/n_stations) %>%
   ggplot() +
   ggtitle("Summer Low Flow") +
-  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -437,7 +439,7 @@ freshet_regime <- mk_freshet %>%
   mutate(percent = n/n_stations) %>%
   ggplot() +
   ggtitle("Date of Freshet") +
-  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +
@@ -475,7 +477,7 @@ date_low_regime <- mk_date_low %>%
   mutate(percent = n/n_stations) %>%
   ggplot() +
   ggtitle("Start of Low Flow Period") +
-  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1) +
+  geom_col(aes(x = Regime , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale.date,
                     drop = FALSE) +
@@ -511,6 +513,31 @@ timing_regime <- ggarrange(freshet_regime, date_low_regime,
 svg_px("./print_ver/out/figs/timing_regime.svg", width = 600, height = 600)
 plot(timing_regime)
 dev.off()
+
+plot_list <- list(
+  All_volume_overall = mk_magnitude + labs(x = "", y = "Number of Stations") + theme(legend.position = "right"),
+  All_timing_overall = mk_timing + theme(legend.position = "right"),
+  All_volume_river_mean = annual_regime + theme(legend.position = "right", plot.margin = unit(c(0,0,0,0), "lines")),
+  All_volume_river_peak = peak_regime + theme(axis.line.x = element_line(),
+                                              axis.text.x = element_text(),
+                                              axis.title.x = element_text(),
+                                              axis.ticks.x = element_line(),
+                                              legend.position = "right", plot.margin = unit(c(0,0,0,0), "lines")),
+  All_volume_river_low = low_regime + theme(axis.line.x = element_line(),
+                                            axis.text.x = element_text(),
+                                            axis.title.x = element_text(),
+                                            axis.ticks.x = element_line(),
+                                            legend.position = "right", plot.margin = unit(c(0,0,0,0), "lines")),
+  All_timing_river_freshet = freshet_regime + theme(axis.line.x = element_line(),
+                                                    axis.text.x = element_text(),
+                                                    axis.title.x = element_text(),
+                                                    axis.ticks.x = element_line(),
+                                                    legend.position = "right", plot.margin = unit(c(0,0,0,0), "lines")),
+  All_timing_river_low_start = date_low_regime + theme(axis.line.x = element_line(),
+                                                       axis.text.x = element_text(),
+                                                       axis.title.x = element_text(),
+                                                       axis.ticks.x = element_line(),
+                                                       legend.position = "right", plot.margin = unit(c(0,0,0,0), "lines")))
 
 ## Geographic Plots (Appendix?) =====================================================================
 # Metrics - Volume
@@ -736,7 +763,66 @@ p6 <- Peace  %>%
 
 p6
 
-
+plot_list[["Liard_volume_mean"]] <- Liard  %>%
+                                          ggplot() +
+                                          geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                          scale_fill_manual(name = "Change per decade",
+                                                            values = colour.scale,
+                                                            drop = FALSE) +
+                                          xlab("") +
+                                          ylab("Number of stations") +
+                                          coord_flip() +
+                                          theme_classic()
+plot_list[["Columbia_volume_mean"]] <- Columbia  %>%
+                                                 ggplot() +
+                                                 geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                 scale_fill_manual(name = "Change per decade",
+                                                                   values = colour.scale,
+                                                                   drop = FALSE) +
+                                                 xlab("") +
+                                                 ylab("Number of stations") +
+                                                 coord_flip() +
+                                                 theme_classic()
+plot_list[["Fraser_volume_mean"]] <- fraser  %>%
+                                             ggplot() +
+                                             geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                             scale_fill_manual(name = "Change per decade",
+                                             values = colour.scale,
+                                             drop = FALSE) +
+                                             xlab("") +
+                                             ylab("Number of stations") +
+                                             coord_flip() +
+                                             theme_classic()
+plot_list[["Peace_volume_mean"]] <- Peace  %>%
+                                           ggplot() +
+                                           geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                           scale_fill_manual(name = "Change per decade",
+                                                             values = colour.scale,
+                                                             drop = FALSE) +
+                                           xlab("") +
+                                           ylab("Number of stations") +
+                                           coord_flip() +
+                                           theme_classic()
+plot_list[["Northwest_volume_mean"]] <- Northwest  %>%
+                                                   ggplot() +
+                                                   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                   scale_fill_manual(name = "Change per decade",
+                                                                     values = colour.scale,
+                                                                     drop = FALSE) +
+                                                   xlab("") +
+                                                   ylab("Number of stations") +
+                                                   coord_flip() +
+                                                   theme_classic()
+plot_list[["Coastal_volume_mean"]] <- coast  %>%
+                                             ggplot() +
+                                             geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                             scale_fill_manual(name = "Change per decade",
+                                                               values = colour.scale,
+                                                               drop = FALSE) +
+                                             xlab("") +
+                                             ylab("Number of stations") +
+                                             coord_flip() +
+                                             theme_classic()
 
 annual_bar_plot <- ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
                             common.legend = TRUE,
@@ -972,6 +1058,66 @@ p6 = Peace  %>%
 
 p6
 
+plot_list[["Liard_volume_peak"]] <- Liard  %>%
+                                           ggplot() +
+                                           geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                           scale_fill_manual(name = "Change per decade",
+                                                             values = colour.scale,
+                                                             drop = FALSE) +
+                                           xlab("") +
+                                           ylab("Number of stations") +
+                                           coord_flip() +
+                                           theme_classic()
+plot_list[["Columbia_volume_peak"]] <- Columbia  %>%
+                                                 ggplot() +
+                                                 geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                 scale_fill_manual(name = "Change per decade",
+                                                                   values = colour.scale,
+                                                                   drop = FALSE) +
+                                                 xlab("") +
+                                                 ylab("Number of stations") +
+                                                 coord_flip() +
+                                                 theme_classic()
+plot_list[["Fraser_volume_peak"]] <- fraser  %>%
+                                             ggplot() +
+                                             geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                             scale_fill_manual(name = "Change per decade",
+                                                               values = colour.scale,
+                                                               drop = FALSE) +
+                                             xlab("") +
+                                             ylab("Number of stations") +
+                                             coord_flip() +
+                                             theme_classic()
+plot_list[["Peace_volume_peak"]] <- Peace  %>%
+                                           ggplot() +
+                                           geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                           scale_fill_manual(name = "Change per decade",
+                                                             values = colour.scale,
+                                                             drop = FALSE) +
+                                           xlab("") +
+                                           ylab("Number of stations") +
+                                           coord_flip() +
+                                           theme_classic()
+plot_list[["Northwest_volume_peak"]] <- Northwest  %>%
+                                                   ggplot() +
+                                                   geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                   scale_fill_manual(name = "Change per decade",
+                                                                     values = colour.scale,
+                                                                     drop = FALSE) +
+                                                   xlab("") +
+                                                   ylab("Number of stations") +
+                                                   coord_flip() +
+                                                   theme_classic()
+plot_list[["Coastal_volume_peak"]] <- coast  %>%
+                                             ggplot() +
+                                             geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                             scale_fill_manual(name = "Change per decade",
+                                                               values = colour.scale,
+                                                               drop = FALSE) +
+                                             xlab("") +
+                                             ylab("Number of stations") +
+                                             coord_flip() +
+                                             theme_classic()
 
 
 peak_bar_plot = ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
@@ -1217,6 +1363,67 @@ low_bar_plot = ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
 
 low_bar_plot
 
+plot_list[["Liard_volume_low"]] <- Liard  %>%
+                                          ggplot() +
+                                          geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                          scale_fill_manual(name = "Change per decade",
+                                                            values = colour.scale,
+                                                            drop = FALSE) +
+                                          xlab("") +
+                                          ylab("Number of stations") +
+                                          coord_flip() +
+                                          theme_classic()
+plot_list[["Columbia_volume_low"]] <- Columbia  %>%
+                                                ggplot() +
+                                                geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                scale_fill_manual(name = "Change per decade",
+                                                                  values = colour.scale,
+                                                                  drop = FALSE) +
+                                                xlab("") +
+                                                ylab("Number of stations") +
+                                                coord_flip() +
+                                                theme_classic()
+plot_list[["Fraser_volume_low"]] <- fraser  %>%
+                                            ggplot() +
+                                            geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                            scale_fill_manual(name = "Change per decade",
+                                                              values = colour.scale,
+                                                              drop = FALSE) +
+                                            xlab("") +
+                                            ylab("Number of stations") +
+                                            coord_flip() +
+                                            theme_classic()
+plot_list[["Peace_volume_low"]] <- Peace  %>%
+                                          ggplot() +
+                                          geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                          scale_fill_manual(name = "Change per decade",
+                                                            values = colour.scale,
+                                                            drop = FALSE) +
+                                          xlab("") +
+                                          ylab("Number of stations") +
+                                          coord_flip() +
+                                          theme_classic()
+plot_list[["Northwest_volume_low"]] <- Northwest  %>%
+                                                  ggplot() +
+                                                  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                  scale_fill_manual(name = "Change per decade",
+                                                                    values = colour.scale,
+                                                                    drop = FALSE) +
+                                                  xlab("") +
+                                                  ylab("Number of stations") +
+                                                  coord_flip() +
+                                                  theme_classic()
+plot_list[["Coastal_volume_low"]] <- coast  %>%
+                                            ggplot() +
+                                            geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                            scale_fill_manual(name = "Change per decade",
+                                                              values = colour.scale,
+                                                              drop = FALSE) +
+                                            xlab("") +
+                                            ylab("Number of stations") +
+                                            coord_flip() +
+                                            theme_classic()
+
 svg_px("./print_ver/out/figs/low_bar.svg", width = 600, height = 600)
 plot(low_bar_plot)
 dev.off()
@@ -1439,7 +1646,61 @@ p6 = Peace  %>%
 
 p6
 
-
+plot_list[["Liard_timing_freshet"]] <- Liard  %>%
+                                              ggplot() +
+                                              geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                              scale_fill_manual(name = "Change per decade",
+                                                                values = colour.scale.date,
+                                                                drop = FALSE) +  xlab("") +
+                                              ylab("Number of stations") +
+                                              coord_flip() +
+                                              theme_classic()
+plot_list[["Columbia_timing_freshet"]] <- Columbia  %>%
+                                                    ggplot() +
+                                                    geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                    scale_fill_manual(name = "Change per decade",
+                                                                      values = colour.scale.date,
+                                                                      drop = FALSE) +  xlab("") +
+                                                    ylab("Number of stations") +
+                                                    coord_flip() +
+                                                    theme_classic()
+plot_list[["Fraser_timing_freshet"]] <- fraser  %>%
+                                                ggplot() +
+                                                geom_col(aes(x = Sub_Basin , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                scale_fill_manual(name = "Change per decade",
+                                                                  values = colour.scale.date,
+                                                                  drop = FALSE) +  xlab("") +
+                                                ylab("Number of stations") +
+                                                coord_flip() +
+                                                theme_classic()
+plot_list[["Peace_timing_freshet"]] <- Peace  %>%
+                                              ggplot() +
+                                              geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                              scale_fill_manual(name = "Change per decade",
+                                                                values = colour.scale.date,
+                                                                drop = FALSE) +  xlab("") +
+                                       ylab("Number of stations") +
+                                       coord_flip() +
+                                       theme_classic()
+plot_list[["Northwest_timing_freshet"]] <- Northwest  %>%
+                                                      ggplot() +
+                                                      geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                      scale_fill_manual(name = "Change per decade",
+                                                                        values = colour.scale.date,
+                                                                        drop = FALSE) +  xlab("") +
+                                                      ylab("Number of stations") +
+                                                      coord_flip() +
+                                                      theme_classic()
+plot_list[["Coastal_timing_freshet"]] <- coast  %>%
+                                                ggplot() +
+                                                geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                scale_fill_manual(name = "Change per decade",
+                                                                  values = colour.scale.date,
+                                                                  drop = FALSE) +
+                                                xlab("") +
+                                                ylab("Number of stations") +
+                                                coord_flip() +
+                                                theme_classic()
 
 freshet_bar_plot = ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
                             common.legend = TRUE,
@@ -1669,6 +1930,60 @@ p6 = Peace  %>%
 
 p6
 
+plot_list[["Liard_timing_low_start"]] <- Liard  %>%
+                                                ggplot() +
+                                                geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                scale_fill_manual(name = "Change per decade",
+                                                                  values = colour.scale.date,
+                                                                  drop = FALSE) +  xlab("") +
+                                                ylab("Number of stations") +
+                                                coord_flip() +
+                                                theme_classic()
+plot_list[["Columbia_timing_low_start"]] <- Columbia  %>%
+                                                      ggplot() +
+                                                      geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                      scale_fill_manual(name = "Change per decade",
+                                                                        values = colour.scale.date,
+                                                                        drop = FALSE) +  xlab("") +
+                                                      ylab("Number of stations") +
+                                                      coord_flip() +
+                                                      theme_classic()
+plot_list[["Fraser_timing_low_start"]] <- fraser  %>%
+                                                  ggplot() +
+                                                  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                  scale_fill_manual(name = "Change per decade",
+                                                                    values = colour.scale.date,
+                                                                    drop = FALSE) +  xlab("") +
+                                                  ylab("Number of stations") +
+                                                  coord_flip() +
+                                                  theme_classic()
+plot_list[["Peace_timing_low_start"]] <- Peace  %>%
+                                                ggplot() +
+                                                geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                scale_fill_manual(name = "Change per decade",
+                                                                  values = colour.scale.date,
+                                                                  drop = FALSE) +  xlab("") +
+                                                ylab("Number of stations") +
+                                                coord_flip() +
+                                                theme_classic()
+plot_list[["Northwest_timing_low_start"]] <- Northwest  %>%
+                                                        ggplot() +
+                                                        geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                        scale_fill_manual(name = "Change per decade",
+                                                                          values = colour.scale.date,
+                                                                          drop = FALSE) +  xlab("") +
+                                                        ylab("Number of stations") +
+                                                        coord_flip() +
+                                                        theme_classic()
+plot_list[["Coastal_timing_low_start"]] <- coast  %>%
+                                                  ggplot() +
+                                                  geom_col(aes(x = fct_reorder(Sub_Basin, region) , y = n, fill = magnitude_fixed), col = "black", linewidth = 0.1, show.legend=TRUE) +
+                                                  scale_fill_manual(name = "Change per decade",
+                                                                    values = colour.scale.date,
+                                                                    drop = FALSE) +  xlab("") +
+                                                  ylab("Number of stations") +
+                                                  coord_flip() +
+                                                  theme_classic()
 
 
 date_low_bar_plot = ggarrange(p4, p3, p2, p6, p5, p1, ncol = 1,
@@ -1808,7 +2123,7 @@ monthly_low_flow_bar_plot = mk_low_flow_monthly %>%
   summarise(n = n()) %>%
   ggplot() +
   # ggtitle("Monthly Low Flow")+
-  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black") +
+  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black", show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
                     drop = FALSE) +
@@ -1868,15 +2183,19 @@ monthly_peak_flow_bar_plot = mk_peak_flow_monthly %>%
   summarise(n = n()) %>%
   ggplot() +
   # ggtitle("Monthly Low Flow")+
-  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black") +
+  geom_col(aes(x = Month, y = n, fill = magnitude_fixed), col = "black", show.legend = TRUE) +
   scale_fill_manual(name = "Change per decade",
                     values = colour.scale,
-                    drop= FALSE) +
+                    drop = FALSE) +
   ylab("Number of Stations") +
   xlab("") +
   theme_classic() +
   theme(legend.position = "bottom") +
   guides(fill = guide_legend(nrow = 1))
+
+plot_list[["All_volume_month_avg_month"]] <- monthly_average_bar_plot + theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1)) + guides(fill = guide_legend(nrow = 6))
+plot_list[["All_volume_month_low_month"]] <- monthly_low_flow_bar_plot + theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1)) + guides(fill = guide_legend(nrow = 6))
+plot_list[["All_volume_month_peak_month"]] <- monthly_peak_flow_bar_plot + theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1)) + guides(fill = guide_legend(nrow = 6))
 
 
 svg_px("./print_ver/out/figs/monthly_peak_flow_bar_plot.svg", width = 800, height = 600)
@@ -1897,6 +2216,36 @@ save(mk_all, annual_bar_plot, low_bar_plot, peak_bar_plot, freshet_bar_plot, dat
 saveRDS(mk_results_tbl, 'print_ver/out/mk_results_tbl.rds')
 
 saveRDS(mk_results_monthly_tbl, 'print_ver/out/mk_results_monthly_tbl.rds')
+
+saveRDS(plot_list, 'app_bar_plots/www/plot_list.rds')
+
+plot_list <- readRDS("app_bar_plots/www/plot_list.rds")
+out_dir <- "app_bar_plots/www/plot_pngs"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+for (id in names(plot_list)) {
+  p <- plot_list[[id]]
+  outfile <- file.path(out_dir, paste0(id, ".png"))
+  # skip if already exists
+  if (file.exists(outfile)) next
+  if (inherits(p, "ggplot")) {
+    tryCatch({
+      ggplot2::ggsave(filename = outfile, plot = p, width = 10, height = 6, units = "in", dpi = 150)
+    }, error = function(e) {
+      message("Failed to save: ", id, " -> ", conditionMessage(e))
+    })
+  } else {
+    # for non-ggplot, try to print to file
+    tryCatch({
+      png(outfile, width = 1000, height = 600, res = 150)
+      if (inherits(p, "recordedplot")) replayPlot(p) else print(p)
+      dev.off()
+    }, error = function(e) {
+      try(if (dev.cur() > 1) dev.off(), silent = TRUE)
+      message("Failed to render non-ggplot: ", id, " -> ", conditionMessage(e))
+    })
+  }
+}
 
 # Appendices ==================================================================================
 
